@@ -1,0 +1,70 @@
+<!-- templates/workout_plan.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personalized Workout Plan</title>
+</head>
+<body>
+    <h1>Hi {{ user.first_name }}, imagine I’m your personal trainer!</h1>
+    <p>Please design a week's worth of varied workouts based on my preferences, body type, and past workouts. Here are all the details you need to know about me:</p>
+    
+    <h2>Personal Info:</h2>
+    <p>My name is {{ user.first_name }} {{ user.last_name }}, born on {{ preferences.dob }}. I track my weight and BMI, and here’s a snapshot of my progress:</p>
+    
+    <ul>
+        {% for record in weight_history %}
+            <li>{{ record.date }}: {{ record.weight }}kg, BMI {{ record.bmi }}</li>
+        {% endfor %}
+    </ul>
+
+    <p>My preffered workout intensity is: {{ preferences.preferred_workout_intensity }}</p>
+
+    <p>My fitness level is: {{ preferences.fitness_level }}
+    
+    
+    <h2>Workout Routine:</h2>
+    <p>Frequency: I aim to work out {{ preferences.workouts_per_week }} times a week.</p>
+    
+    <h3>Preferred Locations:</h3>
+    <ul>
+        
+            <li>{{ locations.name }} ({{ locations.location_type }}) – Equipment: 
+                {% for equipment in locations.equipment.all %}
+                    {{ equipment.equipment_type }} ({{ equipment.custom_equipment|default:equipment.equipment }})
+                    {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </li>
+        
+    </ul>
+    
+    <h3>Workout Preferences:</h3>
+    <p>Types: {{ preferences.workout_preferences|join:", " }}.</p>
+    <p>Time: I prefer {{ preferences.preferred_workout_time }} sessions.</p>
+    <p>Fitness Goals: {{ preferences.fitness_goals|join:", " }}.</p>
+    <p>Muscle groups I want to focus on are: {{ preferences.specific_muscle_groups }}.</p>
+    <p>My cadio preferences are: {{ preferences.cardio_preferences }}.</p>
+    <p>Preffered Recovery and rest days consist of: {{ preferences.recovery_and_rest }}.</p>
+    
+    <h2>Past Workouts:</h2>
+    {% for session in workout_sessions %}
+        <p>{{ session.date }} at {{ session.location.name }} ({{ session.workout_type }}: {{ session.muscle_groups|join:", " }})</p>
+        <ul>
+            <li><strong>Warm-up:</strong> {{ session.warm_up.description }}</li>
+            <li><strong>Exercises:</strong>
+                <ul>
+                    {% for exercise in session.exercises.all %}
+                        <li>{{ exercise.name }}: {{ exercise.sets }} sets of {{ exercise.reps }} reps, actual weight {{ exercise.actual_weight|default:"Bodyweight" }} {% if exercise.recommended_weight %}(recommended {{ exercise.recommended_weight }}kg){% endif %}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li><strong>Cool-down:</strong> {{ session.cool_down.description }}</li>
+            <li><strong>Time Taken:</strong> {{ session.time_taken }} mins</li>
+            <li><strong>Ratings:</strong> Difficulty - {{ session.difficulty_rating }}, Enjoyment - {{ session.enjoyment_rating }}</li>
+        </ul>
+    {% endfor %}
+
+    <p>Using this information, please create a week of personalized, varied workouts for me that aligns with my fitness goals, available equipment, and ideal workout style and intensity. Include warm-ups and cool-downs, set and rep counts, recommended weights, and instructions on whether to perform supersets, circuits, or intervals. Thank you!</p>
+</body>
+</html>

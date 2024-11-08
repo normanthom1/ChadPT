@@ -1,0 +1,20 @@
+<!-- workouts/location_list.html -->
+<h1>Available Locations</h1>
+<a href="{% url 'location_create' %}">Add New Location</a>
+
+<ul>
+    {% for location in locations %}
+    <li>
+        <strong>{{ location.name }}</strong> - Shared: {{ location.shared }}
+        <br>
+        Equipment: 
+        {% for equipment in location.equipment.all %}
+            {{ equipment.name }} 
+        {% endfor %}
+        <br>
+        Additional Equipment: {{ location.additional_equipment }}
+        <br>
+        <a href="{% url 'location_update' location.id %}">Edit</a>
+    </li>
+    {% endfor %}
+</ul>

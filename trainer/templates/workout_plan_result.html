@@ -1,0 +1,7 @@
+<!-- templates/workout_plan_result.html -->
+<h1>Your Generated Workout Plan</h1>
+{% if workout_plan %}
+    <pre>{{ workout_plan|safe }}</pre>
+{% else %}
+    <p>No workout plan generated.</p>
+{% endif %}
