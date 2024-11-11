@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
-from .forms import CustomUserCreationForm, WorkoutPlanForm
+from .forms import CustomUserCreationForm, WorkoutPlanForm, UserUpdateForm, LocationForm
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser, UserPreference, WeightHistory, WorkoutSession, Location
 import os
@@ -10,6 +10,8 @@ import google.generativeai as genai
 from django.views.decorators.csrf import csrf_exempt
 import requests
 from django.http import JsonResponse
+from django.contrib import messages
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv_path = BASE_DIR / '.env'
@@ -29,6 +31,26 @@ def signup(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'signup.html', {'form': form})
+
+
+
+
+@login_required
+def update_profile(request):
+    # Get or create UserPreference instance for the logged-in user
+    user_preference, created = UserPreference.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=user_preference)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('profile')  # Adjust to your profile view or redirect target
+    else:
+        form = UserUpdateForm(instance=user_preference)
+
+    return render(request, 'update_profile.html', {'form': form})
+
 
 @login_required
 def workout_plan(request):
@@ -193,5 +215,30 @@ def send_user_data_to_gemini(request):
         form = WorkoutPlanForm()
 
     return render(request, 'generate_workout.html', {'form': form})
+
+# View for creating a new location
+def location_create(request):
+    if request.method == 'POST':
+        form = LocationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('location_list')  # Redirect to a location list or detail page after saving
+    else:
+        form = LocationForm()
+    return render(request, 'location_form.html', {'form': form, 'action': 'Create'})
+
+
+
+# View for updating an existing location
+def location_update(request, pk):
+    location = get_object_or_404(Location, pk=pk)
+    if request.method == 'POST':
+        form = LocationForm(request.POST, instance=location)
+        if form.is_valid():
+            form.save()
+            return redirect('location_list')  # Redirect to a location list or detail page after saving
+    else:
+        form = LocationForm(instance=location)
+    return render(request, 'location_form.html', {'form': form, 'action': 'Update'})
 
 

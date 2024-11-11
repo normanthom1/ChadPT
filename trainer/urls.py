@@ -10,5 +10,8 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('generate_workout/', views.send_user_data_to_gemini, name='generate_workout'),
     # path('generate_workout/', views.send_user_data_to_gemini, name='generate_workout'),
-    path('workout_plan/', views.workout_plan_result, name='workout_plan_result'), 
+    path('workout_plan/', views.workout_plan_result, name='workout_plan_result'),
+    path('locations/new/', views.location_create, name='location_create'),  # Create view
+    path('locations/<int:pk>/edit/', views.location_update, name='location_update'),  # Update view
+    path('profile/update/', views.update_profile, name='update_profile'),
 ]

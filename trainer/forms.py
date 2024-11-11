@@ -6,6 +6,14 @@ from django.contrib.auth.forms import UserCreationForm
 
 
 
+class LocationForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = ['name', 'location_type', 'address', 'equipment']
+        widgets = {
+            'equipment': forms.CheckboxSelectMultiple()  # Allows selection of multiple equipment
+        }
+
 
 
 
@@ -246,4 +254,69 @@ class WorkoutPlanForm(forms.Form):
         label="Workout Length (in minutes)",
         required=False
     )
+
+
+
+class UserUpdateForm(forms.ModelForm):
+    # CustomUser fields
+    email = forms.EmailField(required=True)
+    firstname = forms.CharField(max_length=50)
+    lastname = forms.CharField(max_length=50)
+    dob = forms.DateField(widget=forms.SelectDateWidget(years=range(1900, 2025)))
+
+    # UserPreference fields
+    workout_preferences = forms.MultipleChoiceField(
+        choices=UserPreference.WORKOUT_PREFERENCE_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    preferred_workout_time = forms.ChoiceField(
+        choices=[('', 'Select Preferred Workout Time')] + [(str(i), f"{i} minutes") for i in range(10, 151, 5)],
+        label="Preferred Workout Time (in minutes)",
+        required=False
+    )
+    fitness_goals = forms.MultipleChoiceField(
+        choices=UserPreference.FITNESS_GOAL_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    specific_muscle_groups = forms.MultipleChoiceField(
+        choices=UserPreference.MUSCLE_GROUP_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    cardio_preferences = forms.MultipleChoiceField(
+        choices=UserPreference.CARDIO_PREFERENCE_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    recovery_and_rest = forms.MultipleChoiceField(
+        choices=UserPreference.RECOVERY_AND_REST_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    preferred_location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False)
+    workouts_per_week = forms.IntegerField(min_value=1, max_value=7)
+    current_injuries = forms.CharField(max_length=50, required=False)
+
+    class Meta:
+        model = UserPreference
+        fields = [
+            'email', 'firstname', 'lastname', 'dob', 'current_injuries',
+            'workout_preferences', 'preferred_workout_time', 'fitness_goals',
+            'specific_muscle_groups', 'cardio_preferences', 'recovery_and_rest',
+            'preferred_location', 'workouts_per_week'
+        ]
+
+    def save(self, commit=True):
+        # Save CustomUser fields
+        user = self.instance.user
+        user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['firstname']
+        user.last_name = self.cleaned_data['lastname']
+        if commit:
+            user.save()
+
+        # Save UserPreference fields
+        return super().save(commit)
 
