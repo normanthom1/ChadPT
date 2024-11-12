@@ -30,7 +30,12 @@ def signup(request):
             return redirect('generate_workout')  # Redirect to your home page or dashboard
     else:
         form = CustomUserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+    # return render(request, 'signup.html', {'form': form})
+    return render(request, 'form_template.html', {
+        'form': form,
+        'form_title': 'Sign Up',
+        'form_id': 'sign-up-form',
+    })
 
 
 
@@ -49,7 +54,12 @@ def update_profile(request):
     else:
         form = UserUpdateForm(instance=user_preference)
 
-    return render(request, 'update_profile.html', {'form': form})
+    # return render(request, 'update_profile.html', {'form': form})
+    return render(request, 'form_template.html', {
+        'form': form,
+        'form_title': 'Update Personal Details',
+        'form_id': 'update-personal-details-form',
+    })
 
 
 @login_required
@@ -214,7 +224,12 @@ def send_user_data_to_gemini(request):
     else:
         form = WorkoutPlanForm()
 
-    return render(request, 'generate_workout.html', {'form': form})
+    # return render(request, 'generate_workout.html', {'form': form})
+    return render(request, 'form_template.html', {
+        'form': form,
+        'form_title': 'Workout',
+        'form_id': 'workout-form',
+    })
 
 # View for creating a new location
 def location_create(request):
@@ -225,7 +240,13 @@ def location_create(request):
             return redirect('location_list')  # Redirect to a location list or detail page after saving
     else:
         form = LocationForm()
-    return render(request, 'location_form.html', {'form': form, 'action': 'Create'})
+    # return render(request, 'location_form.html', {'form': form, 'action': 'Create'})
+    return render(request, 'form_template.html', {
+        'form': form,
+        'form_title': 'Add Location',
+        'form_id': 'location-form',
+        'action': 'Create',
+    })
 
 
 
@@ -239,6 +260,12 @@ def location_update(request, pk):
             return redirect('location_list')  # Redirect to a location list or detail page after saving
     else:
         form = LocationForm(instance=location)
-    return render(request, 'location_form.html', {'form': form, 'action': 'Update'})
+    # return render(request, 'location_form.html', {'form': form, 'action': 'Update'})
+    return render(request, 'form_template.html', {
+        'form': form,
+        'form_title': 'Edit Location',
+        'form_id': 'location-update-form',
+        'action': 'Update',
+    })
 
 

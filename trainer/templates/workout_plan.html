@@ -1,11 +1,6 @@
-<!-- templates/workout_plan.html -->
+{% extends 'base.html' %}
+{% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Personalized Workout Plan</title>
-</head>
 <body>
     <h1>Hi {{ user.first_name }}, imagine I’m your personal trainer!</h1>
     <p>Please design a week's worth of varied workouts based on my preferences, body type, and past workouts. Here are all the details you need to know about me:</p>
@@ -67,4 +62,5 @@
 
     <p>Using this information, please create a week of personalized, varied workouts for me that aligns with my fitness goals, available equipment, and ideal workout style and intensity. Include warm-ups and cool-downs, set and rep counts, recommended weights, and instructions on whether to perform supersets, circuits, or intervals. Thank you!</p>
 </body>
-</html>
+{% endblock %}
+

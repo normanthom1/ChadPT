@@ -1,4 +1,5 @@
-<!-- workouts/location_list.html -->
+{% extends 'base.html' %}
+{% block content %}
 <h1>Available Locations</h1>
 <a href="{% url 'location_create' %}">Add New Location</a>
 
@@ -18,3 +19,4 @@
     </li>
     {% endfor %}
 </ul>
+{% endblock %}
