@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <h1>Welcome to Your Fitness App</h1>
+    <p>Manage your preferences, generate workouts, and track your progress.</p>
+
+    <div class="locations">
+      <h3>Available Locations</h3>
+      <ul>
+        {% for location in locations %}
+          <li id="location-{{ location.id }}">
+            <div class="location-card">
+              <h5>{{ location.name }}</h5>
+              <p>{{ location.location_type }}</p>
+              <!-- HTMX to load or hide details for the location -->
+              <button 
+                hx-get="{% url 'location_detail' location.id %}" 
+                hx-target="#location-{{ location.id }}" 
+                hx-swap="afterend"
+                class="btn btn-info"
+                id="details-toggle-{{ location.id }}"
+                hx-trigger="click"
+                hx-on="htmx:afterSwap: toggleButtonText">
+                Show Details
+              </button>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- This section will be updated dynamically with location details -->
+    <!-- Removed the static #location-detail div -->
+
+    {% if user.is_authenticated %}
+      <div class="user-preference">
+        <h3>Your Preferences</h3>
+        <p>Fitness Goals: {{ preferences.fitness_goals }}</p>
+        <p>Workout Preferences: {{ preferences.workout_preferences }}</p>
+        <p>Workouts per Week: {{ preferences.workouts_per_week }}</p>
+        <p>Preferred Location: {{ preferred_location.name }}</p>  <!-- Render single preferred location -->
+      </div>
+
+      <div class="workout-summary">
+        <h3>Your Workout Summary</h3>
+        <p>Workouts Completed: {{ workout_sessions.count }}</p>
+        <p>Goals: {{ preferences.goals }}</p>
+      </div>
+
+      <div class="workout-history">
+        <h3>Recent Workouts</h3>
+        <ul>
+          {% for workout in workout_sessions %}
+            <li>
+              <p>{{ workout.date }} - {{ workout.workout_type }} - {{ workout.duration }} mins</p>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="weight-history">
+        <h3>Recent Weight History</h3>
+        <ul>
+          {% for entry in weight_history %}
+            <li>
+              <p>{{ entry.date }} - Weight: {{ entry.weight }} kg</p>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Optionally, add a "Generate Workout" button with HTMX -->
+      <button hx-get="{% url 'generate_workout' %}" hx-target="#workout-summary" class="btn btn-primary">
+        Generate Workout
+      </button>
+    {% else %}
+      <p>You are not logged in. <a href="{% url 'login' %}">Login</a> to get started!</p>
+    {% endif %}
+  </div>
+
+  <script>
+    // Custom JavaScript to toggle button text
+    function toggleButtonText(event) {
+      const button = event.target;
+      const locationCard = button.closest('li');
+      const details = locationCard.querySelector('.location-details');
+  
+      if (details) {
+        if (details.style.display === 'none' || details.style.display === '') {
+          button.innerText = 'Hide Details';
+          details.style.display = 'block';
+        } else {
+          button.innerText = 'Show Details';
+          details.style.display = 'none';
+        }
+      }
+    }
+  
+    // Listen for HTMX content swap event
+    document.addEventListener('htmx:afterOnLoad', function (event) {
+      toggleButtonText(event);
+    });
+  </script>
+  
+{% endblock %}

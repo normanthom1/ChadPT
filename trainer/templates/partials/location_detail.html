@@ -1,0 +1,13 @@
+<!-- location_detail.html -->
+<div class="location-details" style="display: none;">
+    <h4>{{ location.name }}</h4>
+    <p><strong>Location Type:</strong> {{ location.location_type }}</p>
+    <p><strong>Address:</strong> {{ location.address }}</p>
+    <h5>Available Equipment:</h5>
+    <ul>
+      {% for equipment in location.equipment.all %}
+        <li>{{ equipment.equipment }} ({{ equipment.equipment_type }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+  

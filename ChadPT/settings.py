@@ -102,6 +102,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# settings.py
+LOGIN_REDIRECT_URL = 'homepage'  # or another URL name or path
+LOGOUT_REDIRECT_URL = 'homepage'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

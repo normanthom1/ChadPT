@@ -11,7 +11,98 @@ from django.views.decorators.csrf import csrf_exempt
 import requests
 from django.http import JsonResponse
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.views import LoginView
+from .forms import CustomAuthenticationForm
 
+class CustomLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
+    template_name = 'registration/login.html'  # Adjust if you have a custom template path
+
+def homepage(request):
+    # Fetch all locations for the homepage
+    locations = Location.objects.all()  # Query all locations
+
+    # Context for the homepage
+    context = {
+        'locations': locations,
+    }
+
+    # If the user is logged in, fetch their preferences and workout data
+    if request.user.is_authenticated:
+        user = request.user  # Get the logged-in user
+        
+        # Get or create the UserPreference for the logged-in user
+        preferences, created = UserPreference.objects.get_or_create(user=user)
+
+        # Fetch the user's workout data (weight history and workout sessions)
+        weight_history = WeightHistory.objects.filter(user=preferences).order_by('-date')[:20]  # Get recent entries
+        workout_sessions = WorkoutSession.objects.filter(user=preferences).order_by('-date')[:20]  # Get recent workouts
+
+        # Preferred location for the user (as a single object)
+        preferred_location = preferences.preferred_location  # Single location, not iterable
+
+        # Add user preference, workout data, and other info to context
+        context.update({
+            "user": user,
+            "preferences": preferences,
+            "weight_history": weight_history,
+            "workout_sessions": workout_sessions,
+            "preferred_location": preferred_location,  # Update to use the single preferred location
+        })
+
+    return render(request, "homepage.html", context)
+
+
+def location_detail(request, location_id):
+    # Get the location by ID
+    location = get_object_or_404(Location, id=location_id)
+    
+    # Fetch the related equipment for the location (many-to-many relationship)
+    equipment = location.equipment.all()
+
+    # Context to be returned with the details of the location
+    context = {
+        'location': location,
+        'equipment': equipment,  # Add the equipment to the context
+    }
+
+    # Return the rendered HTML fragment for the location detail
+    return render(request, "partials/location_detail.html", context)
+
+# def homepage(request):
+#     # Fetch all locations for the homepage
+#     locations = Location.objects.all()
+
+#     # Context for the homepage
+#     context = {
+#         'locations': locations,
+#     }
+
+#     # If the user is logged in, fetch their preferences and workout data
+#     if request.user.is_authenticated:
+#         user = request.user  # Get the logged-in user
+        
+#         # Get or create the UserPreference for the logged-in user
+#         preferences, created = UserPreference.objects.get_or_create(user=user)
+
+#         # Fetch the user's workout data (weight history and workout sessions)
+#         weight_history = WeightHistory.objects.filter(user=preferences).order_by('-date')[:20]  # Get recent entries
+#         workout_sessions = WorkoutSession.objects.filter(user=preferences).order_by('-date')[:20]  # Get recent workouts
+
+#         # Preferred location for the user
+#         locations = preferences.preferred_location
+
+#         # Add user preference, workout data, and other info to context
+#         context.update({
+#             "user": user,
+#             "preferences": preferences,
+#             "weight_history": weight_history,
+#             "workout_sessions": workout_sessions,
+#             "locations": locations,
+#         })
+
+#     return render(request, "homepage.html", context)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv_path = BASE_DIR / '.env'

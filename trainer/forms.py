@@ -3,8 +3,10 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser, UserPreference, Location
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 
-
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={"autofocus": True}))
 
 class LocationForm(forms.ModelForm):
     class Meta:

@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.homepage, name='homepage'),
     # path('locations/', views.location_list, name='location_list'),
     # path('locations/add/', views.location_create, name='location_create'),
     # path('locations/update/<int:pk>/', views.location_update, name='location_update'),
@@ -14,4 +15,7 @@ urlpatterns = [
     path('locations/new/', views.location_create, name='location_create'),  # Create view
     path('locations/<int:pk>/edit/', views.location_update, name='location_update'),  # Update view
     path('profile/update/', views.update_profile, name='update_profile'),
+    path('location/<int:location_id>/', views.location_detail, name='location_detail'),
+    path('login/', views.CustomLoginView.as_view(), name='login'),
+    # path('', views.home, name='home'),
 ]
