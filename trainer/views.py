@@ -300,7 +300,8 @@ def send_user_data_to_gemini(request):
                             description=exercise.get('description')
                         )
 
-                return redirect('workout_plan_result')
+                # return redirect('workout_plan_result')
+                return redirect('upcoming_workouts', group_id=generate_group_id)
 
             except requests.exceptions.RequestException as e:
                 return JsonResponse({"error": f"Error sending request to Gemini: {str(e)}"}, status=500)
@@ -312,7 +313,45 @@ def send_user_data_to_gemini(request):
         'form': form,
         'form_title': 'Workout',
         'form_id': 'workout-form',
-    })  
+    })
+
+
+def upcoming_workouts_view(request, group_id):
+    """
+    Display the list of workouts created in a group, showing details of each workout.
+    """
+    # Query the workout sessions based on group_id
+    workouts = WorkoutSession.objects.filter(group_id=group_id).order_by('date')
+    
+    # Retrieve exercises, warm-ups, and cool-downs associated with each workout
+    workouts_data = []
+    for workout in workouts:
+        exercises = Exercise.objects.filter(workout=workout)
+        warm_up = WarmUp.objects.filter(workout=workout).first()
+        cool_down = CoolDown.objects.filter(workout=workout).first()
+
+        workouts_data.append({
+            'name': workout.name,
+            'goal': workout.goal,
+            'date': workout.date,
+            'description': workout.description,
+            'warm_up': warm_up.description if warm_up else "No warm-up",
+            'cool_down': cool_down.description if cool_down else "No cool-down",
+            'exercises': [
+                {
+                    'name': exercise.name,
+                    'sets': exercise.sets,
+                    'reps': exercise.reps,
+                    'description': exercise.description,
+                    'recommended_weight': exercise.recommended_weight
+                } for exercise in exercises
+            ]
+        })
+
+    return render(request, 'upcoming_workouts.html', {
+        'workouts_data': workouts_data,
+    })
+
 
 
 def location_create(request):

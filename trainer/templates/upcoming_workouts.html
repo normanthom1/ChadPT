@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Upcoming Workouts</h2>
+
+{% for workout in workouts_data %}
+<br>
+    <div class="workout-card">
+        <h3>{{ workout.name }}</h3>
+        <p><strong>Goal:</strong> {{ workout.goal }}</p>
+        <p><strong>Date:</strong> {{ workout.date }}</p>
+        <p><strong>Description:</strong> {{ workout.description }}</p>
+        <p><strong>Warm-Up:</strong> {{ workout.warm_up }}</p>
+        
+
+        <h4>Workout:</h4>
+        <ul>
+            {% for exercise in workout.exercises %}
+            <li>
+                <strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}
+                {% if exercise.recommended_weight is not none %}
+                    <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
+                {% endif %}
+                <br>
+                <em>{{ exercise.description }}</em>
+            </li>
+        {% endfor %}
+        </ul>
+        <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
+    </div>
+{% endfor %}
+
+{% endblock %}

@@ -17,5 +17,6 @@ urlpatterns = [
     path('profile/update/', views.update_profile, name='update_profile'),
     path('location/<int:location_id>/', views.location_detail, name='location_detail'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('upcoming_workouts/<str:group_id>/', views.upcoming_workouts_view, name='upcoming_workouts'),
     # path('', views.home, name='home'),
 ]
