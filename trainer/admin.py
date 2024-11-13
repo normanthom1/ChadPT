@@ -7,11 +7,11 @@ from .models import (
     WeightHistory,
     WorkoutSession,
     WarmUp,
-    WarmUpExercise,
+    # WarmUpExercise,
     CoolDown,
-    CoolDownExercise,
+    # CoolDownExercise,
     Exercise,
-    CardioExercise,
+    # CardioExercise,
 )
 
 # Register your models here
@@ -22,8 +22,6 @@ admin.site.register(UserPreference)
 admin.site.register(WeightHistory)
 admin.site.register(WorkoutSession)
 admin.site.register(WarmUp)
-admin.site.register(WarmUpExercise)
 admin.site.register(CoolDown)
-admin.site.register(CoolDownExercise)
 admin.site.register(Exercise)
-admin.site.register(CardioExercise)
+# admin.site.register(CardioExercise)

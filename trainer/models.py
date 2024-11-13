@@ -1,7 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
 from .equipment_groups import EQUIPMENT_GROUP_CHOICES, EQUIPMENT_CHOICES
-from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from .managers import CustomUserManager  # Import the custom manager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -68,7 +66,6 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
-
 
 
 class UserPreference(models.Model):
@@ -168,11 +165,13 @@ class UserPreference(models.Model):
     LOWER_BODY = 'Lower Body'
     CORE = 'Core'
     FULL_BODY = 'Full Body'
+    FULL_BODY_TARGETTED = 'Full Body (Individual Workouts should target specific muscel groups'
     MUSCLE_GROUP_CHOICES = [
         (UPPER_BODY, 'Upper Body'),
         (LOWER_BODY, 'Lower Body'),
         (CORE, 'Core'),
         (FULL_BODY, 'Full Body'),
+        (FULL_BODY_TARGETTED, FULL_BODY_TARGETTED)
     ]
 
     # Cardio Preferences
@@ -234,7 +233,7 @@ class UserPreference(models.Model):
         blank=True,
     )
     specific_muscle_groups = models.CharField(
-        max_length=15,
+        max_length=100,
         choices=MUSCLE_GROUP_CHOICES,
         blank=True,
         null=True,
@@ -266,15 +265,20 @@ class WeightHistory(models.Model):
 
 
 class WorkoutSession(models.Model):
+    group_id = models.CharField(max_length=20)
     user = models.ForeignKey(UserPreference, on_delete=models.CASCADE, related_name='workouts')
+    name = models.CharField(max_length=100, null=True)
+    goal = models.CharField(max_length=400, null=True)
+    considerations = models.CharField(max_length=400, null=True)
+    explanation = models.CharField(max_length=400, null=True)
     date = models.DateField()
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, related_name='workouts')
     description = models.TextField()  # e.g., "Complete each exercise in traditional sets"
-    time_taken = models.DurationField()  # stores time taken for the workout
-    difficulty_rating = models.PositiveIntegerField()
-    enjoyment_rating = models.PositiveIntegerField()
-    workout_type = models.CharField(max_length=50)  # e.g., "Strength Training"
-    muscle_groups = models.JSONField()  # e.g., ["Chest", "Back", "Legs"]
+    time_taken = models.DurationField(null=True)  # stores time taken for the workout
+    difficulty_rating = models.PositiveIntegerField(null=True)
+    enjoyment_rating = models.PositiveIntegerField(null=True)
+    workout_type = models.CharField(null=True, max_length=50)  # e.g., "Strength Training"
+    muscle_groups = models.JSONField(null=True)  # e.g., ["Chest", "Back", "Legs"]
 
     def __str__(self):
         return f"Workout on {self.date} - {self.user.firstname}"
@@ -283,30 +287,19 @@ class WarmUp(models.Model):
     workout = models.OneToOneField(WorkoutSession, on_delete=models.CASCADE, related_name='warm_up')
     description = models.TextField()  # e.g., "Light cardio and dynamic stretching"
 
-#IS THIS MODEL NEEDED??
-class WarmUpExercise(models.Model):
-    warm_up = models.ForeignKey(WarmUp, on_delete=models.CASCADE, related_name='exercises')
-    name = models.CharField(max_length=100)
-    duration = models.DurationField()  # duration of the warm-up exercise
-
 class CoolDown(models.Model):
     workout = models.OneToOneField(WorkoutSession, on_delete=models.CASCADE, related_name='cool_down')
     description = models.TextField()  # e.g., "Static stretching and light cardio"
 
-#IS THIS MODEL NEEDED??
-class CoolDownExercise(models.Model):
-    cool_down = models.ForeignKey(CoolDown, on_delete=models.CASCADE, related_name='exercises')
-    name = models.CharField(max_length=100)
-    duration = models.DurationField()  # duration of the cool-down exercise
 
 class Exercise(models.Model):
     workout = models.ForeignKey(WorkoutSession, on_delete=models.CASCADE, related_name='exercises')
     name = models.CharField(max_length=100)
-    recommended_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    actual_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    reps = models.PositiveIntegerField()
-    sets = models.PositiveIntegerField()
-    notes = models.TextField(null=True)
+    recommended_weight = models.TextField(null=True)
+    actual_weight = models.TextField(null=True)
+    reps = models.TextField(null=True)
+    sets = models.TextField(null=True)
+    description = models.TextField(null=True)
 
     def __str__(self):
         return f"{self.name} for {self.workout}"
