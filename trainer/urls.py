@@ -13,5 +13,9 @@ urlpatterns = [
     path('profile/update/', views.update_profile, name='update_profile'),
     path('location/<int:location_id>/', views.location_detail, name='location_detail'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
-    path('upcoming-workouts/<str:group_id>/', views.upcoming_workouts_view, name='upcoming_workouts'),
+    # path('upcoming-workouts/<str:group_id>/', views.upcoming_workouts_view, name='upcoming_workouts'),
+    path('workouts/<int:group_id>/', views.upcoming_workouts_view, name='upcoming_workouts'),
+    path('workouts/<int:workout_id>/', views.workout_detail_view, name='workout_detail'),
+    path('workouts/replace/<int:workout_id>/', views.replace_workout, name='replace_workout'),
+    path('workouts/<int:workout_id>/exercise/replace/<int:exercise_id>/', views.replace_exercise, name='replace_exercise'),
 ]

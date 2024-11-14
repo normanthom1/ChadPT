@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Workout Details</title>
+</head>
+<body>
+    <h1>Workout: {{ workout.name }}</h1>
+    <p><strong>Date:</strong> {{ workout.date }}</p>
+    <p><strong>Goal:</strong> {{ workout.goal }}</p>
+
+    <h2>Exercises</h2>
+    <ul>
+        {% for exercise in exercises %}
+            <li id="exercise-{{ exercise.id }}">
+                <p><strong>Name:</strong> {{ exercise.name }}</p>
+                <p><strong>Sets:</strong> {{ exercise.sets }} - <strong>Reps:</strong> {{ exercise.reps }}</p>
+                
+                <!-- Button to replace individual exercise -->
+                <form action="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" method="get">
+                    <button type="submit">Change Exercise</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -4,30 +4,46 @@
 <h2>Upcoming Workouts</h2>
 
 {% for workout in workouts_data %}
-<br>
-    <div class="workout-card">
+    <div class="workout-card" id="workout-{{ workout.id }}">
         <h3>{{ workout.name }}</h3>
         <p><strong>Goal:</strong> {{ workout.goal }}</p>
         <p><strong>Date:</strong> {{ workout.date }}</p>
         <p><strong>Description:</strong> {{ workout.description }}</p>
         <p><strong>Warm-Up:</strong> {{ workout.warm_up }}</p>
         
-
         <h4>Workout:</h4>
         <ul>
             {% for exercise in workout.exercises %}
-            <li>
+            {% comment %} <li id="exercise-{{ exercise.exercise_id }}"> {% endcomment %}
+                <p>Exercise ID: {{ exercise.id }}</p> <!-- Debugging line -->
                 <strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}
-                {% if exercise.recommended_weight is not none %}
+                {% if exercise.recommended_weight %}
                     <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
                 {% endif %}
-                <br>
                 <em>{{ exercise.description }}</em>
+        
+                <!-- HTMX button to replace individual exercise -->
+                <button hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
+                        hx-target="#exercise-{{ exercise.id }}" 
+                        hx-swap="outerHTML">
+                    Change Exercise
+                </button>
             </li>
         {% endfor %}
+        
         </ul>
         <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
+
+        <!-- HTMX button to replace the entire workout -->
+        <button class="btn btn-outline-warning btn-md btn-block"
+                hx-post="{% url 'replace_workout' workout.id %}" 
+                hx-target="#workout-{{ workout.id }}" 
+                hx-swap="outerHTML">
+            Change Workout
+        </button>
     </div>
+    <br>
 {% endfor %}
+<br>
 
 {% endblock %}

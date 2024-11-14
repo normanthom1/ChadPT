@@ -16,6 +16,7 @@ import random
 import json
 import google.generativeai as genai
 import requests
+import re
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv_path = BASE_DIR / '.env'
@@ -23,6 +24,15 @@ dotenv_path = BASE_DIR / '.env'
 if dotenv_path.exists():
     load_dotenv(dotenv_path)
 
+
+def replace_text(text, new_date):
+    # Replace the date in the format YYYY-MM-DD
+    text = re.sub(r'The workout should start on \d{4}-\d{2}-\d{2}', f'The workout should start on {new_date}', text)
+    
+    # Replace 'one day tailored' with 'one week tailored' if it exists in the text
+    text = re.sub(r'one week tailored', 'one day tailored', text)
+    
+    return text
 
 def generate_random_id():
     """Generates a random 20-digit ID."""
@@ -256,7 +266,7 @@ def send_user_data_to_gemini(request):
 
             # Construct payload text for Gemini API request
             payload_text = (
-                f"Imagine you are a personal trainer. Create a unique and challenging workout plan for the one {plan_duration_value} "
+                f"Imagine you are a personal trainer. Create a unique and challenging workout plan for one {plan_duration_value} "
                 f"tailored to the individual's current fitness goals and workout frequency. Avoid repetition of past exercises while "
                 f"ensuring a focus on under-targeted muscle groups based on workout history and user preference. The workout should "
                 f"start on {start_date}\n\n"
@@ -296,12 +306,15 @@ def send_user_data_to_gemini(request):
                 "[{{\n"
                 "  \"name\": \"Workout Name\",\n"
                 "  \"goal\": \"Goal of the workout\",\n"
+                "  \"muscle group\": \"Muscle group worked\",\n"
+                "  \"location\": \"Location of workout\",\n"
                 "  \"date\": \"28-10-2024\",\n"
                 "  \"exercises\": [\n"
                 "    {{\n"
                 "      \"name\": \"Exercise Name\",\n"
                 "      \"sets\": \"3\",\n"
                 "      \"reps\": \"10 per leg\",\n"
+                "      \"recommended_weight\": \"10 kg\",\n"
                 "      \"description\": \"Exercise description\"\n"
                 "    }}\n"
                 "  ],\n"
@@ -310,7 +323,7 @@ def send_user_data_to_gemini(request):
                 "  \"important_considerations\": \"Important considerations\",\n"
                 "  \"explanation\": \"Detailed explanation of the workout\"\n"
                 "}}]\n"
-                "Ensure each exercise has a \"name\", \"sets\", \"reps\", and \"description\"."
+                # "Ensure each exercise has a name, sets, reps, \"location\", \"muscle groups worked\", and \"description\"."
             )
 
             # Send request to Gemini API
@@ -318,6 +331,7 @@ def send_user_data_to_gemini(request):
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-1.5-flash")
             response = model.generate_content(payload_text)
+            print(response.text)
 
 
 
@@ -352,7 +366,8 @@ def send_user_data_to_gemini(request):
                             name=exercise.get('name'),
                             sets=exercise.get('sets'),
                             reps=exercise.get('reps'),
-                            description=exercise.get('description')
+                            description=exercise.get('description'),
+                            recommended_weight=exercise.get('recommended_weight')
                         )
 
                 # return redirect('workout_plan_result')
@@ -370,15 +385,9 @@ def send_user_data_to_gemini(request):
         'form_id': 'workout-form',
     })
 
-
+@csrf_exempt
 def upcoming_workouts_view(request, group_id):
-    """
-    Display the list of workouts created in a group, showing details of each workout.
-    """
-    # Query the workout sessions based on group_id
     workouts = WorkoutSession.objects.filter(group_id=group_id).order_by('date')
-    
-    # Retrieve exercises, warm-ups, and cool-downs associated with each workout
     workouts_data = []
     for workout in workouts:
         exercises = Exercise.objects.filter(workout=workout)
@@ -386,6 +395,7 @@ def upcoming_workouts_view(request, group_id):
         cool_down = CoolDown.objects.filter(workout=workout).first()
 
         workouts_data.append({
+            'id': workout.id,
             'name': workout.name,
             'goal': workout.goal,
             'date': workout.date,
@@ -394,6 +404,7 @@ def upcoming_workouts_view(request, group_id):
             'cool_down': cool_down.description if cool_down else "No cool-down",
             'exercises': [
                 {
+                    'id': exercise.id,
                     'name': exercise.name,
                     'sets': exercise.sets,
                     'reps': exercise.reps,
@@ -403,11 +414,172 @@ def upcoming_workouts_view(request, group_id):
             ]
         })
 
-    return render(request, 'upcoming_workouts.html', {
-        'workouts_data': workouts_data,
+    return render(request, 'upcoming_workouts.html', {'workouts_data': workouts_data, 'group_id': group_id})
+
+@csrf_exempt
+def replace_workout(request, workout_id):
+    if request.method == "POST":
+        user = request.user
+        preferences = get_object_or_404(UserPreference, user=user)
+        # Delete the specified workout and its related data
+        workout = get_object_or_404(WorkoutSession, id=workout_id)
+        workout_date = workout.date
+        group_id = workout.group_id
+        workout.delete()  # This cascades to delete WarmUp, CoolDown, and Exercises
+        
+        # Retrieve the original query
+        original_query = get_object_or_404(Query, group_id=group_id).query
+
+        # Call Gemini API to get a new workout
+        api_key = os.getenv('GEMINI_API')
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        # print(original_query)
+        response = model.generate_content(replace_text(original_query, workout_date))
+        print("HERE")
+        print(workout_date)
+        print(replace_text(original_query, workout_date))
+
+        
+        # Parse the response and save new workout data
+        workout_data = convert_text_to_json(response.text)
+        # print(response.text)  # You would need a JSON parsing function here
+        for workout in workout_data:
+            workout_session = WorkoutSession.objects.create(
+                group_id=group_id,
+                user=preferences,
+                location=preferences.preferred_location,
+                name=workout.get('name'),
+                goal=workout.get('goal'),
+                date=workout.get('date'),
+                description=workout.get('explanation'),
+                workout_type=workout.get('workout_type'),
+            )
+
+            WarmUp.objects.create(workout=workout_session, description=workout.get('warm_up'))
+            CoolDown.objects.create(workout=workout_session, description=workout.get('cool_down'))
+
+            for exercise in workout.get('exercises', []):
+                Exercise.objects.create(
+                    workout=workout_session,
+                    name=exercise.get('name'),
+                    sets=exercise.get('sets'),
+                    reps=exercise.get('reps'),
+                    description=exercise.get('description')
+                )
+
+
+        return redirect('upcoming_workouts', group_id=group_id)
+
+    return JsonResponse({'status': 'failed'}, status=400)
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import WorkoutSession, Exercise
+
+
+
+
+# def replace_exercise(request, workout_id, exercise_id):
+#     # Retrieve the specific workout session and the exercise that we want to replace
+#     workout = get_object_or_404(WorkoutSession, id=workout_id)
+#     exercise = get_object_or_404(Exercise, id=exercise_id, workout=workout)  # Ensure the exercise belongs to the workout
+
+#     if request.method == 'POST':
+#         # Update the exercise with form data (example: exercise name, sets, reps)
+#         exercise.name = request.POST.get('name', exercise.name)
+#         exercise.sets = request.POST.get('sets', exercise.sets)
+#         exercise.reps = request.POST.get('reps', exercise.reps)
+#         exercise.recommended_weight = request.POST.get('recommended_weight', exercise.recommended_weight)
+#         # exercise.actual_weight = request.POST.get('actual_weight', exercise.actual_weight)
+#         exercise.description = request.POST.get('description', exercise.description)
+        
+#         # Save the updated exercise
+#         exercise.save()
+        
+#         # Redirect back to the workout detail page after updating
+#         return redirect('workout_detail', workout_id=workout.id)
+    
+#     # If GET request, render the form with the current exercise details pre-filled
+#     return render(request, 'replace_exercise.html', {
+#         'workout': workout,
+#         'exercise': exercise
+#     })
+
+def generate_exercise_query(exercise_data):
+    # Generate a query string to send to the model based on the exercise data
+    payload_text = (
+        f"Replace exercise '{exercise_data['name']}', with sets: "
+        f"{exercise_data['sets']}, reps: {exercise_data['reps']}, "
+        f"the replacement exercise should target similar muscle groups. "
+        "Format the entire response as JSON as follows:\n"
+        "[\n"
+        "    {\n"
+        "        \"name\": \"Exercise Name\",\n"
+        "        \"sets\": \"3\",\n"
+        "        \"reps\": \"10 per leg\",\n"
+        "        \"recommended_weight\": \"10 kg\",\n"
+        "        \"description\": \"Exercise description\"\n"
+        "    }\n"
+        "]\n"
+    )
+    return payload_text
+
+@csrf_exempt
+def replace_exercise(request, workout_id, exercise_id):
+    # Retrieve the specific workout session and the exercise that we want to replace
+    workout = get_object_or_404(WorkoutSession, id=workout_id)
+    exercise = get_object_or_404(Exercise, id=exercise_id, workout=workout)  # Ensure the exercise belongs to the workout
+
+    if request.method == 'POST':
+        # Collect details of the current exercise to send to the API
+        exercise_data = {
+            'name': exercise.name,
+            'sets': exercise.sets,
+            'reps': exercise.reps,
+            'recommended_weight': exercise.recommended_weight,
+            'description': exercise.description
+        }
+
+        # Configure API connection
+        api_key = os.getenv('GEMINI_API')
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+
+        print(generate_exercise_query(exercise_data))
+
+        # Call the API to get a similar exercise based on the current one
+        response = model.generate_content(generate_exercise_query(exercise_data))
+        new_exercise_data = convert_text_to_json(response.text)
+
+        # Delete the old exercise
+        exercise.delete()
+
+        # Create and save the new exercise based on the API response
+        Exercise.objects.create(
+            workout=workout,
+            name=new_exercise_data.get('name'),
+            sets=new_exercise_data.get('sets'),
+            reps=new_exercise_data.get('reps'),
+            recommended_weight=new_exercise_data.get('recommended_weight'),
+            description=new_exercise_data.get('description')
+        )
+
+        # Redirect back to the workout detail page
+        return redirect('upcoming_workouts', group_id=workout.group_id)
+
+    # Render the replace exercise form for GET requests
+    return render(request, 'replace_exercise.html', {
+        'workout': workout,
+        'exercise': exercise
     })
 
-
+def workout_detail_view(request, workout_id):
+    # Retrieve the workout session and all associated exercises
+    workout = get_object_or_404(WorkoutSession.objects.prefetch_related('exercises'), id=workout_id)
+    exercises = workout.exercises.all()  # Access exercises through the related name
+    
+    return render(request, 'workout_detail.html', {'workout': workout, 'exercises': exercises})
 
 def location_create(request):
     """
