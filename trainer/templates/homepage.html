@@ -1,9 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="container">
+<div class="card">
+    <div class="card-header">
+        Daily Inspiration
+      </div>
+    <div class="card-body">
+        <blockquote class="blockquote mb-0">
+          <em>{{ selected_quote.quote }}</em>
+          {% if selected_quote.author %}
+            <footer class="blockquote-footer">{{ selected_quote.author }}</footer>
+          {% endif %}
+        </blockquote>
+      </div>
+    </div>
+    <br>
     <h1>Welcome to Your Fitness App</h1>
     <p>Manage your preferences, generate workouts, and track your progress.</p>
+    <!-- Inspirational Quote -->
+    {% comment %} <div class="card mt-4">
+        <div class="card-header">Weight and BMI Progress</div>
+        <div class="card-body">
+            <canvas id="bmiWeightChart" width="400" height="200"></canvas>
+        </div>
+    </div> {% endcomment %}
 
     <div class="locations">
       <h3>Available Locations</h3>
@@ -37,7 +57,7 @@
       <div class="user-preference">
         <h3>Your Preferences</h3>
         <p>Fitness Goals: {{ preferences.fitness_goals }}</p>
-        <p>Workout Preferences: {{ preferences.workout_preferences }}</p>
+        <p>Workout Preferences: {{ preferences.workout_preferences}}</p>
         <p>Workouts per Week: {{ preferences.workouts_per_week }}</p>
         <p>Preferred Location: {{ preferred_location.name }}</p>  <!-- Render single preferred location -->
       </div>
@@ -45,7 +65,6 @@
       <div class="workout-summary">
         <h3>Your Workout Summary</h3>
         <p>Workouts Completed: {{ workout_sessions.count }}</p>
-        <p>Goals: {{ preferences.goals }}</p>
       </div>
 
       <div class="workout-history">
@@ -64,7 +83,7 @@
         <ul>
           {% for entry in weight_history %}
             <li>
-              <p>{{ entry.date }} - Weight: {{ entry.weight }} kg</p>
+              <p>{{ entry.date }} - Weight: {{ entry.weight }} kg - BMI: {{entry.bmi}}</p>
             </li>
           {% endfor %}
         </ul>
@@ -79,28 +98,88 @@
     {% endif %}
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Custom JavaScript to toggle button text
-    function toggleButtonText(event) {
-      const button = event.target;
-      const locationCard = button.closest('li');
-      const details = locationCard.querySelector('.location-details');
+      const weightData = {{ weight_data|default:"[]"|safe }};
+
+      
+      const dates = weightData.map(entry => entry.date);
+      const weights = weightData.map(entry => entry.weight);
+      const bmis = weightData.map(entry => entry.bmi);
   
-      if (details) {
-        if (details.style.display === 'none' || details.style.display === '') {
-          button.innerText = 'Hide Details';
-          details.style.display = 'block';
-        } else {
-          button.innerText = 'Show Details';
-          details.style.display = 'none';
-        }
+      const ctx = document.getElementById('bmiWeightChart').getContext('2d');
+      const bmiWeightChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+              labels: dates,
+              datasets: [
+                  {
+                      label: 'Weight (kg)',
+                      data: weights,
+                      borderColor: 'blue',
+                      fill: false,
+                      yAxisID: 'y-weight',
+                  },
+                  {
+                      label: 'BMI',
+                      data: bmis,
+                      borderColor: 'green',
+                      fill: false,
+                      yAxisID: 'y-bmi',
+                  }
+              ]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true,
+                  },
+                  yAxes: [
+                      {
+                          id: 'y-weight',
+                          type: 'linear',
+                          position: 'left',
+                          title: {
+                              display: true,
+                              text: 'Weight (kg)',
+                          },
+                      },
+                      {
+                          id: 'y-bmi',
+                          type: 'linear',
+                          position: 'right',
+                          title: {
+                              display: true,
+                              text: 'BMI',
+                          },
+                          grid: {
+                              drawOnChartArea: false,
+                          },
+                      }
+                  ]
+              }
+          }
+      });
+  
+      function toggleButtonText(event) {
+          const button = event.target;
+          const locationCard = button.closest('li');
+          const details = locationCard.querySelector('.location-details');
+    
+          if (details) {
+              if (details.style.display === 'none' || details.style.display === '') {
+                  button.innerText = 'Hide Details';
+                  details.style.display = 'block';
+              } else {
+                  button.innerText = 'Show Details';
+                  details.style.display = 'none';
+              }
+          }
       }
-    }
   
-    // Listen for HTMX content swap event
-    document.addEventListener('htmx:afterOnLoad', function (event) {
-      toggleButtonText(event);
-    });
+      document.addEventListener('htmx:afterOnLoad', function (event) {
+          toggleButtonText(event);
+      });
   </script>
   
 {% endblock %}

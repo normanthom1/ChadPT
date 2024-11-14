@@ -7,6 +7,7 @@ from .models import (
     WeightHistory,
     WorkoutSession,
     WarmUp,
+    Query,
     # WarmUpExercise,
     CoolDown,
     # CoolDownExercise,
@@ -24,4 +25,5 @@ admin.site.register(WorkoutSession)
 admin.site.register(WarmUp)
 admin.site.register(CoolDown)
 admin.site.register(Exercise)
+admin.site.register(Query)
 # admin.site.register(CardioExercise)

@@ -165,7 +165,7 @@ class UserPreference(models.Model):
     LOWER_BODY = 'Lower Body'
     CORE = 'Core'
     FULL_BODY = 'Full Body'
-    FULL_BODY_TARGETTED = 'Full Body (Individual Workouts should target specific muscel groups'
+    FULL_BODY_TARGETTED = 'Full Body (Individual Workouts should target specific muscel groups)'
     MUSCLE_GROUP_CHOICES = [
         (UPPER_BODY, 'Upper Body'),
         (LOWER_BODY, 'Lower Body'),
@@ -262,6 +262,11 @@ class WeightHistory(models.Model):
 
     class Meta:
         ordering = ['-date']
+
+class Query(models.Model):
+    group_id = models.CharField(max_length=20)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_query')
+    query = models.CharField(max_length=2000)
 
 
 class WorkoutSession(models.Model):

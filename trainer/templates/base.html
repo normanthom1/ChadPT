@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tax Calculator</title>
+    <title>ChadPT</title>
     <!-- Bootstrap CSS CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@1.8.4"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="www.google.com">Home</a>
+        <a class="navbar-brand" href="{% url 'homepage' %}">Home</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="www.google.com">Update Personal Details</a>
+                    <a class="nav-link" href="{% url 'update_profile' %}">Update Personal Details</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="wwww.google.com">Upcomming Workouts</a>
+                    <a class="nav-link" href="{% url 'homepage' %}">Upcomming Workouts</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="wwww.google.com">Past Workouts</a>
+                    <a class="nav-link" href="{% url 'homepage' %}">Past Workouts</a>
                 </li>
             </ul>
         </div>

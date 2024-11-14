@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 
 from .forms import CustomUserCreationForm, WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm
-from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location
+from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location, Query, CustomUser
 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -36,7 +36,8 @@ class CustomLoginView(LoginView):
     """
     authentication_form = CustomAuthenticationForm
     template_name = 'registration/login.html'
-
+from django.shortcuts import render
+import random
 
 def homepage(request):
     """
@@ -44,14 +45,59 @@ def homepage(request):
     If the user is logged in, includes user-specific preferences and workout data.
     """
     locations = Location.objects.all()
+    quotes = [
+        {"quote": "The only bad workout is the one that didn’t happen.", "author": None},
+        {"quote": "Take care of your body. It’s the only place you have to live.", "author": "Jim Rohn"},
+        {"quote": "Exercise is a celebration of what your body can do, not a punishment for what you ate.", "author": None},
+        {"quote": "The pain you feel today will be the strength you feel tomorrow.", "author": None},
+        {"quote": "Push yourself, because no one else is going to do it for you.", "author": None},
+        {"quote": "Sweat is fat crying.", "author": None},
+        {"quote": "Success usually comes to those who are too busy to be looking for it.", "author": "Henry David Thoreau"},
+        {"quote": "Fitness is not about being better than someone else. It’s about being better than you used to be.", "author": None},
+        {"quote": "Motivation is what gets you started. Habit is what keeps you going.", "author": "Jim Ryun"},
+        {"quote": "The body achieves what the mind believes.", "author": None},
+        {"quote": "What hurts today makes you stronger tomorrow.", "author": "Jay Cutler"},
+        {"quote": "Your body can stand almost anything. It’s your mind that you have to convince.", "author": None},
+        {"quote": "Train insane or remain the same.", "author": None},
+        {"quote": "The only way to define your limits is by going beyond them.", "author": "Arthur C. Clarke"},
+        {"quote": "The only bad workout is the one you didn’t do.", "author": None},
+        {"quote": "Strength does not come from physical capacity. It comes from an indomitable will.", "author": "Mahatma Gandhi"},
+        {"quote": "Success is usually the culmination of controlling failure.", "author": "Sylvester Stallone"},
+        {"quote": "You don’t have to be extreme, just consistent.", "author": None},
+        {"quote": "Don’t limit your challenges, challenge your limits.", "author": None},
+        {"quote": "Nothing will work unless you do.", "author": "Maya Angelou"}
+        # Add more quotes as desired
+    ]
+
+    # Select a random quote
+    selected_quote = random.choice(quotes)
     context = {'locations': locations}
 
+    weight_data = []
+    weight_history = []
+
     if request.user.is_authenticated:
+        # Retrieve or create UserPreference before using it
         user = request.user
         preferences, created = UserPreference.objects.get_or_create(user=user)
+        
+        # Now you can safely use preferences in other queries
         weight_history = WeightHistory.objects.filter(user=preferences).order_by('-date')[:20]
+        weight_data = [
+            {
+                'date': entry['date'],
+                'weight': float(entry['weight']) if isinstance(entry['weight'], Decimal) else entry['weight'],
+                'bmi': float(entry['bmi']) if isinstance(entry['bmi'], Decimal) else entry['bmi'],
+            }
+            for entry in weight_data
+        ]
         workout_sessions = WorkoutSession.objects.filter(user=preferences).order_by('-date')[:20]
         preferred_location = preferences.preferred_location
+            # Join the fitness goals into a comma-separated string
+        if preferences.fitness_goals:  # Check if fitness_goals is not empty or None
+            preferences.fitness_goals = ', '.join(preferences.fitness_goals)
+        if preferences.workout_preferences:  # Check if fitness_goals is not empty or None
+            preferences.workout_preferences = ', '.join(preferences.workout_preferences)
 
         context.update({
             "user": user,
@@ -59,6 +105,8 @@ def homepage(request):
             "weight_history": weight_history,
             "workout_sessions": workout_sessions,
             "preferred_location": preferred_location,
+            "selected_quote": selected_quote,
+            "weight_data": weight_data,
         })
 
     return render(request, "homepage.html", context)
@@ -271,10 +319,17 @@ def send_user_data_to_gemini(request):
             model = genai.GenerativeModel("gemini-1.5-flash")
             response = model.generate_content(payload_text)
 
+
+
             try:
                 # Parse JSON response and save workouts to database
                 workout_data = convert_text_to_json(response.text)
                 generate_group_id = generate_random_id()
+                Query.objects.create(
+                    group_id = generate_group_id,
+                    user = CustomUser.objects.filter(email=request.user.email).first(),
+                    query = payload_text
+                )
                 
                 for workout in workout_data:
                     workout_session = WorkoutSession.objects.create(
