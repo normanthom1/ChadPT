@@ -14,24 +14,27 @@
         <h4>Workout:</h4>
         <ul>
             {% for exercise in workout.exercises %}
-            {% comment %} <li id="exercise-{{ exercise.exercise_id }}"> {% endcomment %}
-                <p>Exercise ID: {{ exercise.id }}</p> <!-- Debugging line -->
-                <strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}
-                {% if exercise.recommended_weight %}
-                    <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
-                {% endif %}
-                <em>{{ exercise.description }}</em>
-        
-                <!-- HTMX button to replace individual exercise -->
-                <button hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
+                <li id="exercise-{{ exercise.id }}">
+                    <strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}
+                    {% if exercise.recommended_weight %}
+                        <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
+                    {% endif %}
+                    <em>{{ exercise.description }}</em>
+                    
+                    <!-- HTMX button to replace individual exercise -->
+                    <button 
+                        class="btn btn-outline-success btn-sm btn-block"
+                        hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
                         hx-target="#exercise-{{ exercise.id }}" 
                         hx-swap="outerHTML">
-                    Change Exercise
-                </button>
-            </li>
-        {% endfor %}
-        
+                        Change Exercise
+                    </button>
+                </li>
+                <br>
+                <div class="vr"></div>
+            {% endfor %}
         </ul>
+
         <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
 
         <!-- HTMX button to replace the entire workout -->
@@ -42,6 +45,7 @@
             Change Workout
         </button>
     </div>
+    <hr>
     <br>
 {% endfor %}
 <br>

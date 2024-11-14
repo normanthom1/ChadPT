@@ -524,16 +524,15 @@ def generate_exercise_query(exercise_data):
         "]\n"
     )
     return payload_text
-
 @csrf_exempt
 def replace_exercise(request, workout_id, exercise_id):
-    # Retrieve the specific workout session and the exercise that we want to replace
     workout = get_object_or_404(WorkoutSession, id=workout_id)
     exercise = get_object_or_404(Exercise, id=exercise_id, workout=workout)  # Ensure the exercise belongs to the workout
 
     if request.method == 'POST':
         # Collect details of the current exercise to send to the API
         exercise_data = {
+            'id': exercise.id,
             'name': exercise.name,
             'sets': exercise.sets,
             'reps': exercise.reps,
@@ -541,14 +540,10 @@ def replace_exercise(request, workout_id, exercise_id):
             'description': exercise.description
         }
 
-        # Configure API connection
+        # Call the API to get a similar exercise based on the current one
         api_key = os.getenv('GEMINI_API')
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-1.5-flash")
-
-        print(generate_exercise_query(exercise_data))
-
-        # Call the API to get a similar exercise based on the current one
         response = model.generate_content(generate_exercise_query(exercise_data))
         new_exercise_data = convert_text_to_json(response.text)
 
@@ -556,23 +551,27 @@ def replace_exercise(request, workout_id, exercise_id):
         exercise.delete()
 
         # Create and save the new exercise based on the API response
-        Exercise.objects.create(
+        new_exercise = Exercise.objects.create(
             workout=workout,
-            name=new_exercise_data.get('name'),
-            sets=new_exercise_data.get('sets'),
-            reps=new_exercise_data.get('reps'),
-            recommended_weight=new_exercise_data.get('recommended_weight'),
-            description=new_exercise_data.get('description')
+            name=new_exercise_data[0].get('name'),
+            sets=new_exercise_data[0].get('sets'),
+            reps=new_exercise_data[0].get('reps'),
+            recommended_weight=new_exercise_data[0].get('recommended_weight'),
+            description=new_exercise_data[0].get('description')
         )
 
-        # Redirect back to the workout detail page
-        return redirect('upcoming_workouts', group_id=workout.group_id)
+        # Return the updated exercise to replace the old one using HTMX
+        return render(request, 'partials/exercise_partial.html', {
+            'exercise': new_exercise,  # Pass the actual new exercise instance
+            'workout': workout
+        })
 
     # Render the replace exercise form for GET requests
     return render(request, 'replace_exercise.html', {
         'workout': workout,
         'exercise': exercise
     })
+
 
 def workout_detail_view(request, workout_id):
     # Retrieve the workout session and all associated exercises

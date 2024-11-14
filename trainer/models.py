@@ -284,6 +284,7 @@ class WorkoutSession(models.Model):
     enjoyment_rating = models.PositiveIntegerField(null=True)
     workout_type = models.CharField(null=True, max_length=50)  # e.g., "Strength Training"
     muscle_groups = models.JSONField(null=True)  # e.g., ["Chest", "Back", "Legs"]
+    complete = models.BooleanField(null=True)
 
     def __str__(self):
         return f"Workout on {self.date} - {self.user.firstname}"
