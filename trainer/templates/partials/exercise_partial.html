@@ -1,4 +1,3 @@
-<p>Exercise ID: {{ exercise.id }}</p>
 <strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}
 {% if exercise.recommended_weight %}
     <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
@@ -6,8 +5,16 @@
 <em>{{ exercise.description }}</em>
 
 <!-- HTMX button to replace individual exercise -->
-<button hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
+{% comment %} <button class="btn btn-outline-success btn-sm btn-block"
+        hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
         hx-target="#exercise-{{ exercise.id }}" 
         hx-swap="outerHTML">
+    Change Exercise
+</button> {% endcomment %}
+<button 
+    class="btn btn-outline-success btn-sm btn-block"
+    hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
+    hx-target="#exercise-{{ exercise.id }}" 
+    hx-swap="outerHTML">
     Change Exercise
 </button>

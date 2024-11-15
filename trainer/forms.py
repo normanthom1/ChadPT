@@ -1,7 +1,7 @@
 # forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, UserPreference, Location
+from .models import CustomUser, UserPreference, Location, WorkoutSession, Exercise
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
@@ -236,4 +236,14 @@ class UserUpdateForm(forms.ModelForm):
 
         # Save UserPreference fields
         return super().save(commit)
+    
+class WorkoutSessionForm(forms.ModelForm):
+    class Meta:
+        model = WorkoutSession
+        fields = ['difficulty_rating', 'enjoyment_rating', 'complete']
+
+class ExerciseForm(forms.ModelForm):
+    class Meta:
+        model = Exercise
+        fields = ['actual_weight']
 

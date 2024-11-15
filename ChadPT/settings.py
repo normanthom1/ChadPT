@@ -138,5 +138,8 @@ env_path = os.path.join(BASE_DIR, '.env')
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv_path = BASE_DIR / '.env'
 
+
 # Load the .env file from the specified path
 load_dotenv(dotenv_path)
+
+LOGOUT_REDIRECT_URL = 'homepage' 

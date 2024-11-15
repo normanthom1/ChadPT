@@ -1,6 +1,7 @@
 # workouts/urls.py
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.homepage, name='homepage'),
@@ -18,4 +19,6 @@ urlpatterns = [
     path('workouts/<int:workout_id>/', views.workout_detail_view, name='workout_detail'),
     path('workouts/replace/<int:workout_id>/', views.replace_workout, name='replace_workout'),
     path('workouts/<int:workout_id>/exercise/replace/<int:exercise_id>/', views.replace_exercise, name='replace_exercise'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('workout/<int:pk>/update/', views.update_workout_session, name='update_workout_session'),
 ]

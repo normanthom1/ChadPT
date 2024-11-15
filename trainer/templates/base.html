@@ -1,30 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}  <!-- Add this line -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChadPT</title>
     <!-- Bootstrap CSS CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@1.8.4"></script>
+    <style>
+        /* Example of setting a background image */
+        body {
+            {% comment %} background-image: url("{% static 'images/Fitness.jpg' %}"); {% endcomment %}
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="{% url 'homepage' %}">Home</a>
-        <div class="collapse navbar-collapse">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'update_profile' %}">Update Personal Details</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'homepage' %}">Upcomming Workouts</a>
+                    <a class="nav-link" href="{% url 'generate_workout' %}">Create Workout</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'homepage' %}">Past Workouts</a>
                 </li>
+                {% if user.is_authenticated %}
+                    <!-- Logout form -->
+                    <li class="nav-item">
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn btn-link" style="display: inline; padding: 0;">Sign Out</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Sign In</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
+    
+    
 
     <div class="container mt-4">
         {% block content %}

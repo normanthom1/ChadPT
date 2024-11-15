@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Workout Session</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Update Workout Session: {{ workout.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+
+
+        <!-- Exercise Formset -->
+        <h4 class="mt-4">Exercises</h4>
+        {% for form in exercise_formset %}
+            <div class="form-group row">
+                <div class="col-9">
+                    <label for="{{ form.actual_weight.id_for_label }}" class="col-form-label">
+                        {{ form.instance.name }} (kg)
+                        {% if form.instance.recommended_weight %}
+                            <small class="text-muted">(Recommended: {{ form.instance.recommended_weight }})</small>
+                        {% endif %}
+                    </label>
+                </div>
+                <div class="col-3">
+                    {{ form.actual_weight }}
+                </div>
+            </div>
+        {% endfor %}
+
+                <!-- Workout Session Form (All on the Same Row) -->
+                <h4 class="mt-4">Workout Details</h4>
+                <br>
+                <div class="form-group row">
+                    <div class="col-6">
+                        <label for="difficulty_rating" class="col-form-label">{{ workout_form.difficulty_rating.label }} (1 - 10)</label>
+                        {{ workout_form.difficulty_rating }}
+                    </div>
+                    <div class="col-6">
+                        <label for="enjoyment_rating" class="col-form-label">{{ workout_form.enjoyment_rating.label }} (1 - 10)</label>
+                        {{ workout_form.enjoyment_rating }}
+                    </div>
+                </div>
+
+        <!-- Submit Button -->
+        <div class="form-group row">
+            <div class="col-4">
+                <label for="complete" class="col-form-label">{{ workout_form.complete.label }}</label>
+                {{ workout_form.complete }}
+            </div>
+            <div class="col-8">
+                <button type="submit" class="btn btn-success btn-block btn-md">Finish Workout</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Include Bootstrap JS and jQuery (Optional) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

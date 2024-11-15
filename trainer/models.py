@@ -284,7 +284,7 @@ class WorkoutSession(models.Model):
     enjoyment_rating = models.PositiveIntegerField(null=True)
     workout_type = models.CharField(null=True, max_length=50)  # e.g., "Strength Training"
     muscle_groups = models.JSONField(null=True)  # e.g., ["Chest", "Back", "Legs"]
-    complete = models.BooleanField(null=True)
+    complete = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Workout on {self.date} - {self.user.firstname}"
@@ -301,8 +301,8 @@ class CoolDown(models.Model):
 class Exercise(models.Model):
     workout = models.ForeignKey(WorkoutSession, on_delete=models.CASCADE, related_name='exercises')
     name = models.CharField(max_length=100)
-    recommended_weight = models.TextField(null=True)
-    actual_weight = models.TextField(null=True)
+    recommended_weight = models.CharField(max_length=30, blank=True, null=True)
+    actual_weight = models.CharField(max_length=30, blank=True, null=True)
     reps = models.TextField(null=True)
     sets = models.TextField(null=True)
     description = models.TextField(null=True)

@@ -5,8 +5,9 @@ from django.contrib.auth.views import LoginView
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse
+from django.forms import modelformset_factory
 
-from .forms import CustomUserCreationForm, WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm
+from .forms import CustomUserCreationForm, WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm, WorkoutSessionForm, ExerciseForm
 from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location, Query, CustomUser
 
 from dotenv import load_dotenv
@@ -621,3 +622,33 @@ def location_update(request, pk):
         'form_id': 'location-update-form',
         'action': 'Update',
     })
+
+@login_required
+def update_workout_session(request, pk):
+    # Get the workout session or return a 404 error if not found
+    workout = get_object_or_404(WorkoutSession, id=pk)
+
+    # Initialize the WorkoutSessionForm with the current workout instance
+    workout_form = WorkoutSessionForm(request.POST or None, instance=workout)
+
+    # Create a formset for updating the actual_weight of exercises
+    ExerciseFormSet = modelformset_factory(Exercise, form=ExerciseForm, extra=0)
+    exercise_formset = ExerciseFormSet(request.POST or None, queryset=workout.exercises.all())
+
+    # Handle form submission
+    if request.method == "POST":
+        if workout_form.is_valid() and exercise_formset.is_valid():
+            # Save workout session
+            workout_form.save()
+
+            # Save each exercise's actual_weight
+            exercise_formset.save()
+
+            return redirect('workout_calendar')  # Redirect to the calendar or other desired view
+
+    context = {
+        'workout_form': workout_form,
+        'exercise_formset': exercise_formset,
+        'workout': workout,
+    }
+    return render(request, 'update_workout_session.html', context)
