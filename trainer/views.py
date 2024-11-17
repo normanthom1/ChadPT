@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.forms import modelformset_factory
 
 from .forms import CustomUserCreationForm, WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm, WorkoutSessionForm, ExerciseForm
-from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location, Query, CustomUser
+from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location, Query, CustomUser, WorkoutSession, Exercise
 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -18,6 +18,7 @@ import json
 import google.generativeai as genai
 import requests
 import re
+import datetime
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv_path = BASE_DIR / '.env'
@@ -104,6 +105,17 @@ def homepage(request):
         ]
         workout_sessions = WorkoutSession.objects.filter(user=preferences).order_by('-date')[:20]
         preferred_location = preferences.preferred_location
+        
+        # Get the next workout session for the user (if available)
+        next_workout = WorkoutSession.objects.filter(user=preferences, date__gt=datetime.date.today()).order_by('date').first()
+        # next_workout_exercises = next_workout.exercises.all() if next_workout else []
+        next_workout_exercises = Exercise.objects.filter(workout=next_workout)
+        # print(f'exercise length {len(next_workout_exercises)}')
+
+        for ex in next_workout_exercises:
+            print(ex.name)
+
+        preferred_location = preferences.preferred_location
             # Join the fitness goals into a comma-separated string
         if preferences.fitness_goals:  # Check if fitness_goals is not empty or None
             preferences.fitness_goals = ', '.join(preferences.fitness_goals)
@@ -118,6 +130,8 @@ def homepage(request):
             "preferred_location": preferred_location,
             "selected_quote": selected_quote,
             "weight_data": weight_data,
+            "next_workout": next_workout,
+            'next_workout_exercises': next_workout_exercises,
         })
 
     return render(request, "homepage.html", context)
@@ -225,21 +239,27 @@ def safe_join(field):
             pass
     return ', '.join(field) if isinstance(field, list) else field
 
-
+    
 def convert_text_to_json(text):
     """
     Converts a given text to a JSON object after removing backticks and unnecessary prefixes.
     """
-    clean_text = text.strip('`').strip()
+    clean_text = text.strip('`').rstrip()
+    
+    # Check for "json" prefix and remove it
     if clean_text.lower().startswith("json"):
         clean_text = clean_text[4:].strip()
-
+    
+    # Clean up any remaining unnecessary parts (like extra backticks or unwanted characters)
+    cleaned_text = clean_text.replace('{{', '{').replace('}}', '}')
+    cleaned_text = cleaned_text.strip('`')  # Strip any remaining backticks at the ends
+    
+    # Attempt to load the cleaned text as JSON
     try:
-        return json.loads(clean_text)
+        return json.loads(cleaned_text)
     except json.JSONDecodeError as e:
         print("Error decoding JSON:", e)
         return None
-    
 
 @csrf_exempt
 def send_user_data_to_gemini(request):
@@ -284,7 +304,7 @@ def send_user_data_to_gemini(request):
                 + (f"Recovery and Rest: {safe_join(preferences.recovery_and_rest)}\n" if preferences.recovery_and_rest and plan_duration_value == 'One Week' else "")
                 + f"\n--- Workout Location & Available Equipment ---\n"
                 + f"Location: {preferred_location.name}\n"
-                + "Equipment:\n"
+                + "Available Equipment for the Workout:\n"
                 + "\n".join([f"  - {equipment.equipment}" for equipment in preferred_location.equipment.all()])
                 + f"\n\n--- Weight History ---\n"
                 + "\n".join([f"  - Date: {entry.date}, Weight: {entry.weight} kg, BMI: {entry.bmi}" for entry in weight_history])
@@ -332,7 +352,7 @@ def send_user_data_to_gemini(request):
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-1.5-flash")
             response = model.generate_content(payload_text)
-            print(response.text)
+            # print(response.text)
 
 
 
@@ -345,6 +365,7 @@ def send_user_data_to_gemini(request):
                     user = CustomUser.objects.filter(email=request.user.email).first(),
                     query = payload_text
                 )
+                
                 
                 for workout in workout_data:
                     workout_session = WorkoutSession.objects.create(
@@ -368,7 +389,8 @@ def send_user_data_to_gemini(request):
                             sets=exercise.get('sets'),
                             reps=exercise.get('reps'),
                             description=exercise.get('description'),
-                            recommended_weight=exercise.get('recommended_weight')
+                            recommended_weight=exercise.get('recommended_weight'),
+                            actual_weight=exercise.get('recommended_weight')
                         )
 
                 # return redirect('workout_plan_result')
@@ -474,38 +496,6 @@ def replace_workout(request, workout_id):
 
     return JsonResponse({'status': 'failed'}, status=400)
 
-
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import WorkoutSession, Exercise
-
-
-
-
-# def replace_exercise(request, workout_id, exercise_id):
-#     # Retrieve the specific workout session and the exercise that we want to replace
-#     workout = get_object_or_404(WorkoutSession, id=workout_id)
-#     exercise = get_object_or_404(Exercise, id=exercise_id, workout=workout)  # Ensure the exercise belongs to the workout
-
-#     if request.method == 'POST':
-#         # Update the exercise with form data (example: exercise name, sets, reps)
-#         exercise.name = request.POST.get('name', exercise.name)
-#         exercise.sets = request.POST.get('sets', exercise.sets)
-#         exercise.reps = request.POST.get('reps', exercise.reps)
-#         exercise.recommended_weight = request.POST.get('recommended_weight', exercise.recommended_weight)
-#         # exercise.actual_weight = request.POST.get('actual_weight', exercise.actual_weight)
-#         exercise.description = request.POST.get('description', exercise.description)
-        
-#         # Save the updated exercise
-#         exercise.save()
-        
-#         # Redirect back to the workout detail page after updating
-#         return redirect('workout_detail', workout_id=workout.id)
-    
-#     # If GET request, render the form with the current exercise details pre-filled
-#     return render(request, 'replace_exercise.html', {
-#         'workout': workout,
-#         'exercise': exercise
-#     })
 
 def generate_exercise_query(exercise_data):
     # Generate a query string to send to the model based on the exercise data

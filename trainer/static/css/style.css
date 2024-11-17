@@ -1,0 +1,88 @@
+
+
+/* Apply white font and white background with 25% opacity to the navbar */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    color: white;
+    font-family: 'HK Grotesk', sans-serif;
+}
+.navbar a, .navbar .navbar-toggler-icon {
+    color: white !important;
+}
+.navbar-light .navbar-nav .nav-link {
+    color: white !important;
+}
+/* Make sure the navbar stays on top of the div */
+.navbar {
+    position: absolute;
+    width: 100%;
+    z-index: 999;
+}
+.navbar-nav {
+    margin-left: auto;
+    margin-right: auto;
+}
+/* Adjust padding for navbar items */
+.navbar-nav .nav-item {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+/* Vertically center the sign-out button */
+.navbar .nav-item form {
+    display: flex;
+    align-items: center;
+}
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center; /* Ensures all nav items are vertically aligned */
+}
+
+.navbar-nav .nav-link {
+    line-height: 1.5; /* Adjust line-height for better vertical alignment */
+    padding-top: 0;  /* Optional: Adjust if necessary */
+    padding-bottom: 0; /* Optional: Adjust if necessary */
+}
+
+form button.nav-link {
+    display: inline-block;
+    padding: 0; /* Remove default button padding */
+    vertical-align: middle; /* Aligns the button with text links */
+}
+
+body {
+    font-family: 'Hanken Grotesk', sans-serif;
+    color: white; /* Set the default font color to white */
+    background-color: black; /* Set default background color if needed */
+}
+
+/* Specific styling for headers or other elements that might have different color or font */
+h2, h3, h4, h5, h6, em, p {
+    font-family: 'Hanken Grotesk', sans-serif;
+    color: white; /* Ensure headers are also white */
+}
+
+h1 {
+    font-family: 'Anton', sans-serif;
+    font-size: 50px;
+    color: #f9ef23;
+    /* margin-top: 20px; */
+}
+
+hr {
+    border-color: #626A71;
+    border-width: 1px;
+}
+
+.yellow-outline-box {
+    border: 1px solid #f9ef23;  /* Faint yellow outline */
+    border-radius: 15px;         /* Rounded corners */
+    padding: 20px;               /* Adds space inside the div */
+    margin-left: 100px;          /* Adds more space on the left */
+    margin-right: 100px;         /* Adds more space on the right */
+    margin-top: 30px;            /* Space above */
+    margin-bottom: 30px;         /* Space below */
+}
+
+
+
+

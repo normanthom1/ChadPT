@@ -1,185 +1,123 @@
 {% extends "base.html" %}
+{% load static %}  <!-- Ensure this is loaded -->
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        Daily Inspiration
-      </div>
-    <div class="card-body">
-        <blockquote class="blockquote mb-0">
-          <em>{{ selected_quote.quote }}</em>
-          {% if selected_quote.author %}
-            <footer class="blockquote-footer">{{ selected_quote.author }}</footer>
-          {% endif %}
-        </blockquote>
-      </div>
-    </div>
-    <br>
-    <h1>Welcome to Your Fitness App</h1>
-    <p>Manage your preferences, generate workouts, and track your progress.</p>
-    <!-- Inspirational Quote -->
-    {% comment %} <div class="card mt-4">
-        <div class="card-header">Weight and BMI Progress</div>
-        <div class="card-body">
-            <canvas id="bmiWeightChart" width="400" height="200"></canvas>
-        </div>
-    </div> {% endcomment %}
+<div class="d-flex flex-column align-items-center justify-content-center" 
+    style="
+        background-image:  url('{% static 'images/Fitness.jpg' %}'); 
+        background-size: cover; 
+        background-position: center; 
+        min-height: 100vh; 
+        text-align: center; 
+        color: white;">
+    <h1 style="font-family: 'Anton', sans-serif; font-size: 100px; color: white;">CHAD PT</h1>
+    <h3 style="font-family: Arial, sans-serif; color: white;">Your AI Personal Trainer</h3>
+    <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Meet Chad</button>
+</div>
 
-    <div class="locations">
-      <h3>Available Locations</h3>
-      <ul>
-        {% for location in locations %}
-          <li id="location-{{ location.id }}">
-            <div class="location-card">
-              <h5>{{ location.name }}</h5>
-              <p>{{ location.location_type }}</p>
-              <!-- HTMX to load or hide details for the location -->
-              <button 
-                hx-get="{% url 'location_detail' location.id %}" 
-                hx-target="#location-{{ location.id }}" 
-                hx-swap="afterend"
-                class="btn btn-info"
-                id="details-toggle-{{ location.id }}"
-                hx-trigger="click"
-                hx-on="htmx:afterSwap: toggleButtonText">
-                Show Details
-              </button>
+<div class="d-flex flex-column align-items-center justify-content-center" 
+    style="background-color: black; 
+           background-size: cover; 
+           background-position: center; 
+           min-height: 100vh; 
+           text-align: center; 
+           color: black; 
+           overflow: auto;">
+    <div class="container custom-margin">
+        <div class="row align-items-center">
+            <!-- Image (left on desktop, top on mobile) -->
+            <div class="col-12 col-md-6">
+                <img src="{% static 'images/Fitness.jpg' %}" alt="Image" class="img-fluid" style="margin-top: 20px; margin-bottom: 10px;">  <!-- Added margin-top here -->
+                <br>
+                <em>{{ selected_quote.quote }}</em>
+                <br>
+                {% if selected_quote.author %}
+                    <footer class="blockquote-footer">{{ selected_quote.author }}</footer>
+                {% endif %}
             </div>
-          </li>
-        {% endfor %}
-      </ul>
+            
+            <!-- Text content (right on desktop, bottom on mobile) -->
+            <div class="col-12 col-md-6">
+                <h1 style="font-family: 'Anton', sans-serif; font-size: 100px; color: #f9ef23; margin-top: 20px;">Hi I'm Chad!</h1>
+                <hr>
+                <p>I'm here to create a workout plan that's 100% tailored to you. Just share your fitness goals, 
+                    workout preferences, and what equipment you've got available, and I'll put together a personalized 
+                    program that adapts as you progress. I'll track your results, adjust your routines, and keep you 
+                    motivated every step of the way. No more guesswork—let's make the most of your time and space. 
+                    Ready to crush your fitness goals? Let’s get started!
+                </p>
+                <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Sign Up</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- This section will be updated dynamically with location details -->
-    <!-- Removed the static #location-detail div -->
 
-    {% if user.is_authenticated %}
-      <div class="user-preference">
-        <h3>Your Preferences</h3>
-        <p>Fitness Goals: {{ preferences.fitness_goals }}</p>
-        <p>Workout Preferences: {{ preferences.workout_preferences}}</p>
-        <p>Workouts per Week: {{ preferences.workouts_per_week }}</p>
-        <p>Preferred Location: {{ preferred_location.name }}</p>  <!-- Render single preferred location -->
-      </div>
+<div class="d-flex flex-column align-items-center justify-content-center" 
+    style="background-image:  url('{% static 'images/Fitness.jpg' %}');
+           background-size: cover; 
+           background-position: center; 
+           min-height: 100vh; 
+           text-align: center; 
+           color: black; 
+           overflow: auto;
+           text-align: left;">
 
-      <div class="workout-summary">
-        <h3>Your Workout Summary</h3>
-        <p>Workouts Completed: {{ workout_sessions.count }}</p>
-      </div>
+        <h1 style="padding-top: 50px;">Next Workout</h1>
 
-      <div class="workout-history">
-        <h3>Recent Workouts</h3>
-        <ul>
-          {% for workout in workout_sessions %}
-            <li>
-              <p>{{ workout.date }} - {{ workout.workout_type }} - {{ workout.duration }} mins</p>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
+        <div class="yellow-outline-box container mt-4">
+        <div class="workout-container">
+            <!-- Display Next Workout -->
+            {% if next_workout %}
+                <h3>{{ next_workout.name }}</h3>
+                <hr>
+                <p><strong>Goal:</strong> {{ next_workout.goal }}</p>
+                <hr>
+                {% comment %} <p><strong>Considerations:</strong> {{ next_workout.considerations }}</p>
+                <p><strong>Explanation:</strong> {{ next_workout.explanation }}</p> {% endcomment %}
+                <p><strong>Description:</strong> {{ next_workout.description }}</p>
+                <hr>
+                <p><strong>Workout Type:</strong> {{ next_workout.workout_type }}</p>
+                <hr>
+                <p><strong>Muscle Groups:</strong> {{ next_workout.muscle_groups|join:", " }}</p>
+                <hr>
+        
+                <!-- Display Warm Up -->
+                <h3>Warm-Up</h3>
+                <p>{{ next_workout.warm_up.description }}</p>
+                <hr>
+                <!-- Display Exercises -->
+                <h3>Exercises</h3>
+                {% for ex in next_workout_exercises %}
+                    <p><strong>{{ ex.name }}</strong> - Sets: {{ ex.sets }}, Reps: {{ ex.reps }}</p>
+                    {% if ex.recommended_weight %}
+                        <p>Recommended Weight: {{ ex.recommended_weight }}</p>
+                    {% endif %}
+                        <em>{{ ex.description }}</em>
+                    <hr>
+                {% endfor %}
+                <h3>Cool-Down</h3>
+                <p>{{ next_workout.cool_down.description }}</p>
+            </div>
+            
 
-      <div class="weight-history">
-        <h3>Recent Weight History</h3>
-        <ul>
-          {% for entry in weight_history %}
-            <li>
-              <p>{{ entry.date }} - Weight: {{ entry.weight }} kg - BMI: {{entry.bmi}}</p>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
+            {% else %}
+                <p>No upcoming workout scheduled.</p>
+            {% endif %}
 
-      <!-- Optionally, add a "Generate Workout" button with HTMX -->
-      <button hx-get="{% url 'generate_workout' %}" hx-target="#workout-summary" class="btn btn-primary">
-        Generate Workout
-      </button>
-    {% else %}
-      <p>You are not logged in. <a href="{% url 'login' %}">Login</a> to get started!</p>
-    {% endif %}
-  </div>
+    </div>
+    <div class="container pb-5">
+        <div class="row align-items-center">
+            <div class="col-6 d-flex justify-content-center">
+                <button class="btn btn-warning mt-3 btn-block" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Past Workouts</button>
+            </div>
+            <div class="col-6 d-flex justify-content-center">
+                <button class="btn btn-warning mt-3 btn-block" style="font-size: 20px;" onclick="scrollToNextDiv(this)">More Upcomming Workouts</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-      const weightData = {{ weight_data|default:"[]"|safe }};
 
-      
-      const dates = weightData.map(entry => entry.date);
-      const weights = weightData.map(entry => entry.weight);
-      const bmis = weightData.map(entry => entry.bmi);
-  
-      const ctx = document.getElementById('bmiWeightChart').getContext('2d');
-      const bmiWeightChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-              labels: dates,
-              datasets: [
-                  {
-                      label: 'Weight (kg)',
-                      data: weights,
-                      borderColor: 'blue',
-                      fill: false,
-                      yAxisID: 'y-weight',
-                  },
-                  {
-                      label: 'BMI',
-                      data: bmis,
-                      borderColor: 'green',
-                      fill: false,
-                      yAxisID: 'y-bmi',
-                  }
-              ]
-          },
-          options: {
-              scales: {
-                  y: {
-                      beginAtZero: true,
-                  },
-                  yAxes: [
-                      {
-                          id: 'y-weight',
-                          type: 'linear',
-                          position: 'left',
-                          title: {
-                              display: true,
-                              text: 'Weight (kg)',
-                          },
-                      },
-                      {
-                          id: 'y-bmi',
-                          type: 'linear',
-                          position: 'right',
-                          title: {
-                              display: true,
-                              text: 'BMI',
-                          },
-                          grid: {
-                              drawOnChartArea: false,
-                          },
-                      }
-                  ]
-              }
-          }
-      });
-  
-      function toggleButtonText(event) {
-          const button = event.target;
-          const locationCard = button.closest('li');
-          const details = locationCard.querySelector('.location-details');
-    
-          if (details) {
-              if (details.style.display === 'none' || details.style.display === '') {
-                  button.innerText = 'Hide Details';
-                  details.style.display = 'block';
-              } else {
-                  button.innerText = 'Show Details';
-                  details.style.display = 'none';
-              }
-          }
-      }
-  
-      document.addEventListener('htmx:afterOnLoad', function (event) {
-          toggleButtonText(event);
-      });
-  </script>
-  
+{% comment %} <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Sign Up</button> {% endcomment %}
 {% endblock %}

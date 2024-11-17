@@ -20,15 +20,6 @@
                         <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
                     {% endif %}
                     <em>{{ exercise.description }}</em>
-                    
-                    <!-- HTMX button to replace individual exercise -->
-                    <button 
-                        class="btn btn-outline-success btn-sm btn-block"
-                        hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
-                        hx-target="#exercise-{{ exercise.id }}" 
-                        hx-swap="outerHTML">
-                        Change Exercise
-                    </button>
                 </li>
                 <br>
                 <div class="vr"></div>

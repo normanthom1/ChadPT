@@ -173,3 +173,4 @@ cython_debug/
 /pyvenv.cfg
 /Lib
 /trainer/migrations
+/ChadPT/scratchpad.html

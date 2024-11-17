@@ -8,24 +8,23 @@
     <!-- Bootstrap CSS CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@1.8.4"></script>
-    <style>
-        /* Example of setting a background image */
-        body {
-            {% comment %} background-image: url("{% static 'images/Fitness.jpg' %}"); {% endcomment %}
-            background-size: cover;
-            background-position: center;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"> 
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{% url 'homepage' %}">Home</a>
+        <a class="navbar-brand" href="{% url 'homepage' %}">
+            <img src="{% static 'images/logo.svg' %}" alt="Logo" width="40" height="40"> <!-- Logo SVG here -->
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
     
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ml-auto"> <!-- ml-auto class aligns items to the right -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'update_profile' %}">Update Personal Details</a>
                 </li>
@@ -37,27 +36,30 @@
                 </li>
                 {% if user.is_authenticated %}
                     <!-- Logout form -->
-                    <li class="nav-item">
-                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-link btn btn-link" style="display: inline; padding: 0;">Sign Out</button>
-                        </form>
-                    </li>
+                <li class="nav-item">
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link btn btn-link" style="display: inline; padding: 0;">Sign Out</button>
+                    </form>
+                </li>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Sign In</a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Sign In</a>
+                </li>
                 {% endif %}
             </ul>
         </div>
     </nav>
     
     
+    
+    
 
-    <div class="container mt-4">
+    {% comment %} <div class="container mt-4"> {% endcomment %}
         {% block content %}
         {% endblock %}
-    </div>
+    {% comment %} </div> {% endcomment %}
+    <script src="{% static 'js/custom.js' %}"></script>
 
     <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
