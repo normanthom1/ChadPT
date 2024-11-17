@@ -1,5 +1,17 @@
 from django.db import models
-from .equipment_groups import EQUIPMENT_GROUP_CHOICES, EQUIPMENT_CHOICES
+from .lists_and_dictionaries import (
+    EQUIPMENT_GROUP_CHOICES, 
+    EQUIPMENT_CHOICES, 
+    FITNESS_GOAL_CHOICES, 
+    WORKOUT_PREFERENCE_CHOICES, 
+    WORKOUT_INTENSITY_CHOICES, 
+    FITNESS_LEVEL_CHOICES, 
+    MUSCLE_GROUP_CHOICES, 
+    CARDIO_PREFERENCE_CHOICES, 
+    RECOVERY_AND_REST_CHOICES, 
+    WORKOUT_TIME_CHOICES,
+    QUOTES
+)
 from django.conf import settings
 from .managers import CustomUserManager  # Import the custom manager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -73,130 +85,6 @@ class UserPreference(models.Model):
     Stores user-specific workout preferences, including preferred workout location,
     type, intensity, and fitness goals.
     """
-    FITNESS_GOAL_CHOICES = sorted([
-        ('increase_strength', 'Increase Strength'),
-        ('improve_muscle_gain', 'Improve Muscle Gain'),
-        ('increase_endurance', 'Increase Endurance'),
-        ('improve_flexibility', 'Improve Flexibility'),
-        ('enhance_mobility', 'Enhance Mobility'),
-        ('improve_cardio_health', 'Improve Cardiovascular Health'),
-        ('increase_core_strength', 'Increase Core Strength'),
-        ('improve_stability', 'Improve Stability'),
-        ('improve_balance', 'Improve Balance'),
-        ('improve_posture', 'Improve Posture'),
-        ('increase_functional_fitness', 'Increase Functional Fitness'),
-        ('enhance_athletic_performance', 'Enhance Athletic Performance'),
-        ('speed_up_injury_recovery', 'Speed Up Injury Recovery'),
-        ('improve_body_composition', 'Improve Body Composition'),
-        ('increase_sprint_speed', 'Increase Sprint Speed'),
-        ('develop_power', 'Develop Power'),
-        ('improve_agility', 'Improve Agility'),
-        ('boost_coordination', 'Boost Coordination'),
-        ('maintain_healthy_weight', 'Maintain Healthy Weight'),
-        ('increase_flexibility_and_strength', 'Increase Flexibility and Strength'),
-        ('improve_endurance_racing_performance', 'Improve Endurance Racing Performance'),
-        ('enhance_sports_performance', 'Enhance Sports Performance'),
-        ('improve_postpartum_recovery', 'Improve Postpartum Recovery'),
-        ('optimize_functional_movement', 'Optimize Functional Movement'),
-        ('increase_stamina', 'Increase Stamina'),
-        ('focus_on_longevity', 'Focus on Longevity'),
-        ('master_bodyweight_exercises', 'Master Bodyweight Exercises'),
-        ('increase_kickboxing_fitness', 'Increase Kickboxing Fitness'),
-        ('improve_boxing_fitness', 'Improve Boxing Fitness'),
-        ('improve_aerobics_fitness', 'Improve Aerobics Fitness'),
-        ('build_strength_in_bodybuilding', 'Build Strength in Bodybuilding'),
-        ('improve_calisthenics_skills', 'Improve Calisthenics Skills'),
-        ('improve_powerlifting_skills', 'Improve Powerlifting Skills'),
-        ('focus_on_strength_training', 'Focus on Strength Training'),
-        ('improve_posture_in_yoga', 'Improve Posture in Yoga'),
-        ('boost_flexibility_in_stretching', 'Boost Flexibility in Stretching'),
-        ('enhance_walking_fitness', 'Enhance Walking Fitness'),
-        ('improve_running_fitness', 'Improve Running Fitness'),
-        ('improve_resistance_training', 'Improve Resistance Training'),
-        ('focus_on_low_impact_fitness', 'Focus on Low Impact Fitness'),
-    ])
-
-    # workout preference choices
-    WORKOUT_PREFERENCE_CHOICES = [
-        ('aerobics', 'Aerobics'),
-        ('barre', 'Barre'),
-        ('bodybuilding', 'Bodybuilding'),
-        ('bootcamp', 'Bootcamp'),
-        ('boxing', 'Boxing'),
-        ('calisthenics', 'Calisthenics'),
-        ('circuit', 'Circuit Training'),
-        ('crossfit', 'CrossFit'),
-        ('crossfit_partner', 'CrossFit Partner Workouts'),
-        ('cycling', 'Indoor Cycling/Spin'),
-        ('f45', 'F45 Training'),
-        ('functional', 'Functional Training'),
-        ('hiit', 'HIIT (High-Intensity Interval Training)'),
-        ('kickboxing', 'Kickboxing'),
-        ('mobility', 'Mobility/Flexibility'),
-        ('pilates', 'Pilates'),
-        ('plyometrics', 'Plyometrics'),
-        ('powerlifting', 'Powerlifting'),
-        ('strength', 'Strength Training'),
-        ('tabata', 'Tabata Training'),
-        ('yoga', 'Yoga'),
-    ]
-    # Preferred Workout Intensity Answers
-    LOW = 'Low'
-    MODERATE = 'Moderate'
-    HIGH = 'High'
-    WORKOUT_INTENSITY_CHOICES = [
-        (LOW, 'Low'),
-        (MODERATE, 'Moderate'),
-        (HIGH, 'High'),
-    ]
-
-    # Fitness Level Answers
-    BEGINNER = 'Beginner'
-    INTERMEDIATE = 'Intermediate'
-    ADVANCED = 'Advanced'
-    FITNESS_LEVEL_CHOICES = [
-        (BEGINNER, 'Beginner'),
-        (INTERMEDIATE, 'Intermediate'),
-        (ADVANCED, 'Advanced')
-    ]
-
-    # Specific Muscle Groups to Focus On
-    UPPER_BODY = 'Upper Body'
-    LOWER_BODY = 'Lower Body'
-    CORE = 'Core'
-    FULL_BODY = 'Full Body'
-    FULL_BODY_TARGETTED = 'Full Body (Individual Workouts should target specific muscel groups)'
-    MUSCLE_GROUP_CHOICES = [
-        (UPPER_BODY, 'Upper Body'),
-        (LOWER_BODY, 'Lower Body'),
-        (CORE, 'Core'),
-        (FULL_BODY, 'Full Body'),
-        (FULL_BODY_TARGETTED, FULL_BODY_TARGETTED)
-    ]
-
-    # Cardio Preferences
-    HIIT = 'HIIT'
-    MODERATE_INTENSITY = 'Moderate Intensity'
-    LOW_IMPACT = 'Low Impact'
-    FUNCTIONAL_CIRCUITS = 'Functional/Cardio Circuits'
-    CARDIO_PREFERENCE_CHOICES = [
-        (HIIT, 'High-Intensity Interval Training (HIIT)'),
-        (MODERATE_INTENSITY, 'Moderate Intensity'),
-        (LOW_IMPACT, 'Low Impact'),
-        (FUNCTIONAL_CIRCUITS, 'Functional/Cardio Circuits'),
-    ]
-
-    # Recovery and Rest
-    ACTIVE_RECOVERY = 'Active Recovery'
-    FULL_REST = 'Full Rest'
-    RECOVERY_TECHNIQUES = 'Recovery Techniques'
-    RECOVERY_AND_REST_CHOICES = [
-        (ACTIVE_RECOVERY, 'Active Recovery Days'),
-        (FULL_REST, 'Full Rest Days'),
-        (RECOVERY_TECHNIQUES, 'Recovery Techniques'),
-    ]
-
-    WORKOUT_TIME_CHOICES = [(str(i), f"{i} minutes") for i in range(10, 151, 5)]
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     firstname = models.CharField(max_length=50)
     lastname = models.CharField(max_length=50)
@@ -216,13 +104,13 @@ class UserPreference(models.Model):
     preferred_workout_intensity = models.CharField(
         max_length=10,
         choices=WORKOUT_INTENSITY_CHOICES,
-        default=MODERATE,
+        default='Moderate',
         blank=True,
     )
     fitness_level = models.CharField(
         max_length=12,
         choices=FITNESS_LEVEL_CHOICES,
-        default=BEGINNER,
+        default='Beginner',
         blank=True,
     )
     preferred_location = models.ForeignKey(

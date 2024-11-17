@@ -83,6 +83,83 @@ hr {
     margin-bottom: 30px;         /* Space below */
 }
 
+/* Style for labels */
+/* Label styles */
+.form-group label {
+    color: #fff; /* White text for labels */
+    font-size: 16px; /* Optional: Adjust font size */
+    font-weight: bold; /* Optional: Make labels bold */
+    margin-bottom: 8px; /* Optional: Add spacing below labels */
+    display: block; /* Ensure the label is above the input */
+    text-align: left; /* Align text to the left */
+}
+
+
+
+/* General input styles */
+.form-control {
+    background-color: #333; /* Faint grey background */
+    color: #fff; /* White text */
+    border: 1px solid #555; /* Subtle border for contrast */
+    border-radius: 4px; /* Slightly rounded corners */
+    padding: 10px; /* Add padding for better usability */
+}
+
+/* Input hover effect */
+.form-control:hover {
+    background-color: #444; /* Slightly darker grey */
+    border-color: #666; /* Highlight the border */
+}
+
+/* Input focus effect */
+.form-control:focus {
+    background-color: #444; /* Keep slightly darker on focus */
+    border-color: #888; /* Highlighted border on focus */
+    box-shadow: 0 0 5px #666; /* Add a subtle glow */
+}
+
+/* Checkbox and radio button styles */
+.checkbox-container .form-check input[type="checkbox"],
+.checkbox-container .form-check input[type="radio"] {
+    background-color: #333; /* Match input boxes */
+    color: #fff; /* Text color */
+    border: 1px solid #555; /* Subtle border */
+}
+
+.checkbox-container .form-check input[type="checkbox"]:hover,
+.checkbox-container .form-check input[type="radio"]:hover {
+    border-color: #666; /* Highlight border on hover */
+    background-color: #444; /* Match input hover background */
+}
+
+/* Scrollable dropdown options */
+select.form-control {
+    background-color: #333; /* Match input boxes */
+    color: #fff; /* Text color for options */
+}
+
+select.form-control option {
+    background-color: #333; /* Match input background */
+    color: #fff; /* Text color */
+}
+
+/* Button styles to fit the theme */
+.btn-success, .btn-secondary {
+    background-color: #444; /* Match darker grey */
+    border-color: #555; /* Subtle border */
+    color: #fff; /* White text */
+}
+
+.btn-success:hover, .btn-secondary:hover {
+    background-color: #555; /* Highlighted grey */
+    border-color: #666; /* Highlighted border */
+    color: #fff; /* Maintain white text */
+}
+
+body {
+    padding-top: 70px; /* Adjust this based on the navbar height */
+}
+
 
 
 

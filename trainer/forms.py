@@ -2,10 +2,19 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser, UserPreference, Location, WorkoutSession, Exercise
+from .lists_and_dictionaries import (
+    FITNESS_GOAL_CHOICES, 
+    WORKOUT_PREFERENCE_CHOICES, 
+    MUSCLE_GROUP_CHOICES, 
+    CARDIO_PREFERENCE_CHOICES, 
+    RECOVERY_AND_REST_CHOICES, 
+    PLAN_DURATION_CHOICES,
+    WORKOUT_TYPE_CHOICES
+)
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.exceptions import ValidationError
 from django.utils import timezone
+
 
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={"autofocus": True}))
@@ -17,18 +26,6 @@ class LocationForm(forms.ModelForm):
         widgets = {
             'equipment': forms.CheckboxSelectMultiple()  # Allows selection of multiple equipment
         }
-
-
-# Ensure to define the choices for the fields in the form as in your model
-WORKOUT_INTENSITY_CHOICES = UserPreference.WORKOUT_INTENSITY_CHOICES
-FITNESS_LEVEL_CHOICES = UserPreference.FITNESS_LEVEL_CHOICES
-MUSCLE_GROUP_CHOICES = UserPreference.MUSCLE_GROUP_CHOICES
-CARDIO_PREFERENCE_CHOICES = UserPreference.CARDIO_PREFERENCE_CHOICES
-RECOVERY_AND_REST_CHOICES = UserPreference.RECOVERY_AND_REST_CHOICES
-WORKOUT_TIME_CHOICES = UserPreference.WORKOUT_TIME_CHOICES
-WORKOUT_PREFERENCE_CHOICES = UserPreference.WORKOUT_PREFERENCE_CHOICES
-FITNESS_GOAL_CHOICES = UserPreference.FITNESS_GOAL_CHOICES
-
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -112,34 +109,6 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class WorkoutPlanForm(forms.Form):
-    PLAN_DURATION_CHOICES = [
-        ('day', 'One Day'),
-        ('week', 'One Week'),
-    ]
-    
-    WORKOUT_TYPE_CHOICES = [('', 'Select a Workout Type')] + sorted([
-        ('aerobics', 'Aerobics'),
-        ('barre', 'Barre'),
-        ('bodybuilding', 'Bodybuilding'),
-        ('bootcamp', 'Bootcamp'),
-        ('boxing', 'Boxing'),
-        ('calisthenics', 'Calisthenics'),
-        ('circuit', 'Circuit Training'),
-        ('crossfit', 'CrossFit'),
-        ('crossfit_partner', 'CrossFit Partner Workouts'),
-        ('cycling', 'Indoor Cycling/Spin'),
-        ('f45', 'F45 Training'),
-        ('functional', 'Functional Training'),
-        ('hiit', 'HIIT (High-Intensity Interval Training)'),
-        ('kickboxing', 'Kickboxing'),
-        ('mobility', 'Mobility/Flexibility'),
-        ('pilates', 'Pilates'),
-        ('plyometrics', 'Plyometrics'),
-        ('powerlifting', 'Powerlifting'),
-        ('strength', 'Strength Training'),
-        ('tabata', 'Tabata Training'),
-        ('yoga', 'Yoga'),
-    ], key=lambda x: x[1])  # Sorts by display name
     
     plan_duration = forms.ChoiceField(
         choices=PLAN_DURATION_CHOICES, 
@@ -183,7 +152,7 @@ class UserUpdateForm(forms.ModelForm):
 
     # UserPreference fields
     workout_preferences = forms.MultipleChoiceField(
-        choices=UserPreference.WORKOUT_PREFERENCE_CHOICES,
+        choices=WORKOUT_PREFERENCE_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -193,22 +162,22 @@ class UserUpdateForm(forms.ModelForm):
         required=False
     )
     fitness_goals = forms.MultipleChoiceField(
-        choices=UserPreference.FITNESS_GOAL_CHOICES,
+        choices=FITNESS_GOAL_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
     specific_muscle_groups = forms.MultipleChoiceField(
-        choices=UserPreference.MUSCLE_GROUP_CHOICES,
+        choices=MUSCLE_GROUP_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
     cardio_preferences = forms.MultipleChoiceField(
-        choices=UserPreference.CARDIO_PREFERENCE_CHOICES,
+        choices=CARDIO_PREFERENCE_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
     recovery_and_rest = forms.MultipleChoiceField(
-        choices=UserPreference.RECOVERY_AND_REST_CHOICES,
+        choices=RECOVERY_AND_REST_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )

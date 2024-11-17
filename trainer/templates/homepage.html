@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}  <!-- Ensure this is loaded -->
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="d-flex flex-column align-items-center justify-content-center" 
@@ -117,7 +118,91 @@
         </div>
     </div>
 </div>
+</div>
 
+<div class="d-flex flex-column align-items-center justify-content-center" 
+    style="background-color: black; 
+           background-size: cover; 
+           background-position: center; 
+           min-height: 100vh; 
+           text-align: center; 
+           color: black; 
+           overflow: auto;">
+           
+    <div class="container mt-4">
+        <div class="container custom-margin">
+            <div class="row align-items-center">
+                <!-- Image (left on desktop, top on mobile) -->
+                <div class="col-12 col-md-6">
+                    <h1 class="mb-4">{{ form_title }}</h1>
+                    <img src="{% static 'images/Fitness.jpg' %}" alt="Image" class="img-fluid" style="margin-top: 20px; margin-bottom: 10px;">  <!-- Added margin-top here -->
+                    <br>
+                    <em>{{ selected_quote.quote }}</em>
+                    <br>
+                    {% if selected_quote.author %}
+                        <footer class="blockquote-footer">{{ selected_quote.author }}</footer>
+                    {% endif %}
+                </div>
+                
+                <!-- Text content (right on desktop, bottom on mobile) -->
+                <div class="col-12 col-md-6">
+                    
+                    <form method="POST" enctype="multipart/form-data" id="{{ form_id }}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                            <div class="form-group mb-3">
+                                {{ field.label_tag }}
+                                
+                                {% if field.field.widget.input_type == "checkbox" %}
+                                    <!-- Custom checkbox layout with scrollable container -->
+                                    <div class="form-check">
+                                        <div class="checkbox-container" style="max-height: 300px; overflow-y: auto;">
+                                            {% for widget in field %}
+                                                <div class="form-check">
+                                                    {{ widget.tag }} {{ widget.choice_label }}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% elif field.field.widget.input_type == "select" %}
+                                    {% if field.field.widget.attrs.multiple %}
+                                        <!-- Multi-select dropdown with scrollable options -->
+                                        <select class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" multiple size="10">
+                                            {% for option in field %}
+                                                <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
+                                                    {{ option.label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        {{ field|add_class:"form-control" }}
+                                    {% endif %}
+                                {% else %}
+                                    {{ field|add_class:"form-control" }}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        <br>
+                
+                        <button type="submit" class="btn btn-warning mt-3 btn-block" style="font-size: 20px;">Let's go</button>
+                    </form>
+
+
+
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+    </div>
+</div>
 
 {% comment %} <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Sign Up</button> {% endcomment %}
 {% endblock %}

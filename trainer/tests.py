@@ -64,10 +64,10 @@ class ModelsTestCase(TestCase):
 
     def test_update_user_preference(self):
         # Update and verify user preference
-        self.user_pref.fitness_level = UserPreference.ADVANCED
+        self.user_pref.fitness_level = 'Advanced'
         self.user_pref.save()
         updated_user_pref = UserPreference.objects.get(id=self.user_pref.id)
-        self.assertEqual(updated_user_pref.fitness_level, UserPreference.ADVANCED)
+        self.assertEqual(updated_user_pref.fitness_level, 'Advanced')
 
     def test_delete_user_preference(self):
         # Delete and verify user preference
