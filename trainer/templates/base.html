@@ -27,13 +27,13 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto"> <!-- ml-auto class aligns items to the right -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'update_profile' %}">Update Personal Details</a>
+                    <a class="nav-link" href="#personal-details">Update Personal Details</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'generate_workout' %}">Create Workout</a>
+                    <a class="nav-link" href="#create-workout">Create Workout</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'homepage' %}">Past Workouts</a>
+                    <a class="nav-link" href="#next-workout">Next Workout</a>
                 </li>
                 {% if user.is_authenticated %}
                     <!-- Logout form -->

@@ -8,42 +8,24 @@
            color: black;">
     <div class="container mt-4">
         <div class="container custom-margin">
+            <h1 class="pb-3 text-center">Upcoming Workouts</h1>
             <div class="row align-items-center">
-                        <div class="col-12 col-md-6">
-                            <h1 class="pb-3">Upcoming Workouts</h1>
-
-                            {% for workout in workouts_data %}
-                                <div class="workout-card" id="workout-{{ workout.id }}">
-   
-                                    <h3 class="pb-3">{{ workout.name }}</h3>
-                                    {% comment %} <hr> {% endcomment %}
-
-                                    <button class="btn btn-outline-warning btn-md btn-block"
-                                    hx-post="{% url 'replace_workout' workout.id %}" 
-                                    hx-target="#workout-{{ workout.id }}" 
-                                    hx-swap="outerHTML">
-                                        Change Workout
-                                    </button>
-
-                                    <p class="pt-3"><strong>Goal:</strong> {{ workout.goal }}</p>
-                                    <p><strong>Date:</strong> {{ workout.date }}</p>
-                                    <p><strong>Description:</strong> {{ workout.description }}</p>
-                                    <p><strong>Warm-Up:</strong> {{ workout.warm_up }}</p>
-                                    
-
-                                    <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
-
-                                    <!-- HTMX button to replace the entire workout -->
-
-                                </div>
-                                <hr>
-                                <br>
-                            {% endfor %}
-                            <br>
-                        </div>
-                        <div class="col-12 col-md-6">
-                        <h4>Workout</h4>
-                        {% for workout in workouts_data %}
+                
+                    {% for workout in workouts_data %}
+                        <div class="yellow-outline-box container mt-4">
+                        {% comment %} <div class="workout-card" id="workout-{{ workout.id }}"> {% endcomment %}
+                            <h3 class="pb-3">{{ workout.name }}</h3>
+                            <button class="btn btn-warning mt-3 btn-block" style="font-size: 20px;"
+                            hx-post="{% url 'replace_workout' workout.id %}" 
+                            hx-target="#workout-{{ workout.id }}" 
+                            hx-swap="outerHTML">
+                                Change Workout
+                            </button>
+                            <p class="pt-3"><strong>Goal:</strong> {{ workout.goal }}</p>
+                            <p><strong>Date:</strong> {{ workout.date }}</p>
+                            <p><strong>Description:</strong> {{ workout.description }}</p>
+                            <p><strong>Warm-Up:</strong> {{ workout.warm_up }}</p>
+                            <h4>Workout</h4>
                             {% for exercise in workout.exercises %}
                                 {% comment %} <li id="exercise-{{ exercise.id }}"> {% endcomment %}
                                     <p><strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}<p>
@@ -54,11 +36,16 @@
                                 {% comment %} </li> {% endcomment %}
                                 <hr>
                             {% endfor %}
-                        {% endfor %}
-                    </div>
-                </div>
+                            <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
+                            <hr>
+                            <br>
+                        </div>
+                    {% endfor %}
+                <br>
             </div>
         </div>
+    </div>
 </div>
+{% comment %} </div> {% endcomment %}
 
 {% endblock %}

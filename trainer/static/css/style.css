@@ -2,7 +2,7 @@
 
 /* Apply white font and white background with 25% opacity to the navbar */
 .navbar {
-    background-color: rgba(255, 255, 255, 0.25) !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
     color: white;
     font-family: 'HK Grotesk', sans-serif;
 }
@@ -74,6 +74,7 @@ hr {
 }
 
 .yellow-outline-box {
+    color: #f9ee232d;
     border: 1px solid #f9ef23;  /* Faint yellow outline */
     border-radius: 15px;         /* Rounded corners */
     padding: 20px;               /* Adds space inside the div */
@@ -118,6 +119,27 @@ hr {
     box-shadow: 0 0 5px #666; /* Add a subtle glow */
 }
 
+form {
+    color: white;
+}
+
+form input,
+form select,
+form textarea,
+form button,
+form label {
+    color: white; /* Sets text color to white for form elements */
+    background-color: transparent; /* Optional: makes backgrounds transparent */
+    border-color: white; /* Optional: makes borders white */
+}
+
+form input::placeholder,
+form textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7); /* Ensures placeholders are also white, but slightly transparent */
+}
+
+
+
 /* Checkbox and radio button styles */
 .checkbox-container .form-check input[type="checkbox"],
 .checkbox-container .form-check input[type="radio"] {
@@ -156,9 +178,18 @@ select.form-control option {
     color: #fff; /* Maintain white text */
 }
 
-body {
-    padding-top: 70px; /* Adjust this based on the navbar height */
+
+.faint-white-box {
+    background-color: #0000007e; /* Faint white with 20% opacity */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Internal spacing */
+    margin: 20px; /* External spacing */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Adds a soft shadow for a floating effect */
+    color: white; /* Ensures text inside the box is white */
 }
+
+
+
 
 
 

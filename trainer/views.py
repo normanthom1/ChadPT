@@ -126,8 +126,12 @@ def homepage(request):
                 model = genai.GenerativeModel("gemini-1.5-flash")
                 response = model.generate_content(payload_text)
                 try:
+                    print(response.text)
                     # Parse JSON response and save workouts to database
                     workout_data = convert_text_to_json(response.text)
+                    print("JSOOOOOON")
+                    print(workout_data)
+                    print(response.text)
                     generate_group_id = generate_random_id()
                     Query.objects.create(
                         group_id = generate_group_id,
@@ -171,6 +175,19 @@ def homepage(request):
 
         ############### Gemini Logic Here #################################
 
+
+
+
+        ###################Personal Details Form#######################
+        # Initialize the personal details form
+        user_preference, created = UserPreference.objects.get_or_create(user=request.user)
+        personal_details_form = UserUpdateForm(request.POST or None, instance=user_preference)
+        if request.method == 'POST' and personal_details_form.is_valid():
+            personal_details_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('homepage')
+    
+
         context.update({
             "user": user,
             "preferences": preferences,
@@ -184,6 +201,7 @@ def homepage(request):
             'form': form,
             'form_title': 'Workout Planner',
             'form_id': 'workout-form',
+            'personal_details_form': personal_details_form
         })
 
     return render(request, "homepage.html", context)
