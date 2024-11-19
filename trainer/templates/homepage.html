@@ -47,7 +47,7 @@
                     motivated every step of the way. No more guesswork—let's make the most of your time and space. 
                     Ready to crush your fitness goals? Let’s get started!
                 </p>
-                <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Sign Up</button>
+                <a class="btn btn-warning mt-3" style="font-size: 20px;" href="{% url 'signup' %}">Sign Up</a>
             </div>
         </div>
     </div>
@@ -66,7 +66,7 @@
 
         <h1 style="padding-top: 50px;">Next Workout</h1>
 
-        <div class="yellow-outline-box container mt-4">
+        <div class="faint-white-box mt-4">
         <div class="workout-container">
             <!-- Display Next Workout -->
             {% if next_workout %}
@@ -89,14 +89,17 @@
                 <hr>
                 <!-- Display Exercises -->
                 <h3>Exercises</h3>
+                {% comment %} <div class='col-8'/> {% endcomment %}
                 {% for ex in next_workout_exercises %}
                     <p><strong>{{ ex.name }}</strong> - Sets: {{ ex.sets }}, Reps: {{ ex.reps }}</p>
                     {% if ex.recommended_weight %}
                         <p>Recommended Weight: {{ ex.recommended_weight }}</p>
                     {% endif %}
                         <em>{{ ex.description }}</em>
-                    <hr>
+                    {% comment %} </div> {% endcomment %}
+                        <hr>
                 {% endfor %}
+
                 <h3>Cool-Down</h3>
                 <p>{{ next_workout.cool_down.description }}</p>
             </div>
@@ -184,7 +187,7 @@
                             </div>
                         {% endfor %}
                         <br>                
-                        <button type="submit" class="btn btn-warning mt-3 btn-block" style="font-size: 20px;">Let's go</button>
+                        <button type="submit" class="btn btn-warning mt-3 btn-block" style="font-size: 20px;">Let's go!</button>
                     </form>
                 </div>
             </div>

@@ -43,7 +43,7 @@ class CustomUserCreationForm(UserCreationForm):
     )
     preferred_workout_time = forms.ChoiceField(
         choices=[('', 'Select Preferred Workout Time')] + [(str(i), f"{i} minutes") for i in range(10, 151, 5)],
-        label="Preferred Workout Time (in minutes)",
+        label="Preferred Workout Time",
         required=False
     )
     fitness_goals = forms.MultipleChoiceField(
@@ -122,14 +122,14 @@ class WorkoutPlanForm(forms.Form):
     
     preferred_location = forms.ModelChoiceField(
         queryset=Location.objects.all(), 
-        label="Select Workout Location",
+        label="Select Workout Location (Optional)",
         required=False,
         empty_label="Select Workout Location"  # Blank option added here
     )
     
     preferred_workout_type = forms.ChoiceField(
         choices=WORKOUT_TYPE_CHOICES, 
-        label="Preferred Workout Type",
+        label="Preferred Workout Type (Optional)",
         required=False
     )
     
@@ -137,7 +137,7 @@ class WorkoutPlanForm(forms.Form):
     
     workout_length = forms.ChoiceField(
         choices=WORKOUT_LENGTH_CHOICES,
-        label="Workout Length (in minutes)",
+        label="Workout Length (Optional)",
         required=False
     )
 
@@ -145,7 +145,7 @@ class WorkoutPlanForm(forms.Form):
 
 class UserUpdateForm(forms.ModelForm):
     # CustomUser fields
-    email = forms.EmailField(required=True)
+    # email = forms.EmailField(required=True)
     firstname = forms.CharField(max_length=50)
     lastname = forms.CharField(max_length=50)
     dob = forms.DateField(widget=forms.SelectDateWidget(years=range(1900, 2025)))
@@ -188,10 +188,10 @@ class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = UserPreference
         fields = [
-            'email', 'firstname', 'lastname', 'dob', 'current_injuries',
-            'workout_preferences', 'preferred_workout_time', 'fitness_goals',
-            'specific_muscle_groups', 'cardio_preferences', 'recovery_and_rest',
-            'preferred_location', 'workouts_per_week'
+            'firstname', 'lastname', 'dob', 'current_injuries',
+            'workout_preferences', 'preferred_location', 'workouts_per_week', 
+            'preferred_workout_time', 'fitness_goals', 'specific_muscle_groups',
+            'cardio_preferences', 'recovery_and_rest'
         ]
 
     def save(self, commit=True):

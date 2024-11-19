@@ -58,6 +58,7 @@
 
     {% comment %} <div class="container mt-4"> {% endcomment %}
         {% load widget_tweaks %}
+        {% load static %}  <!-- Ensure this is loaded -->
         {% block content %}
         {% endblock %}
     {% comment %} </div> {% endcomment %}

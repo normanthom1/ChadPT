@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}  <!-- Ensure this is loaded -->
+{% load widget_tweaks %}
+
+{% block content %}
+
+<div class="d-flex flex-column align-items-center justify-content-center pt-5 pb-5"; 
+style="background-image: url('{% static 'images/Fitness.jpg' %}');
+       background-size: cover; 
+       background-position: center; 
+       min-height: 100vh; 
+       text-align: center; 
+       color: black; 
+       overflow: auto;">
+<div class="pt-5">
+
+<h1>Update Personal Details</h1>
+<div class="faint-white-box">
+    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-12 col-md-6 pr-3">
+                {% for field in form %}
+                    {% if field.name == "preferred_workout_time" %}
+                        <div class="form-group mb-3">
+                            {{ field.label_tag }}
+                            {% if field.field.widget.input_type == "select" %}
+                                {{ field|add_class:"form-control" }}
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                        </div>
+                        <!-- End left column when 'Preferred Workout Time' is reached -->
+                        </div>
+                        <!-- Right Column -->
+                        <div class="col-12 col-md-6">
+                    {% else %}
+                        <div class="form-group mb-3">
+                            {{ field.label_tag }}
+                            {% if field.field.widget.input_type == "checkbox" %}
+                                <div class="form-check">
+                                    <div class="checkbox-container faint-white-box" style="max-height: 300px; overflow-y: auto; text-align: left;">
+                                        {% for widget in field %}
+                                            <div class="form-check">
+                                                {{ widget.tag }} {{ widget.choice_label }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% elif field.field.widget.input_type == "select" %}
+                                {% if field.field.widget.attrs.multiple %}
+                                    <select class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" multiple size="10">
+                                        {% for option in field %}
+                                            <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
+                                                {{ option.label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                {% else %}
+                                    {{ field|add_class:"form-control" }}
+                                {% endif %}
+                            {% else %}
+                                {{ field|add_class:"form-control" }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <br>
+        <div class="container text-center">
+            <button type="submit" class="btn btn-warning mt-3 btn-block">Update</button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+
+
+{% endblock %}

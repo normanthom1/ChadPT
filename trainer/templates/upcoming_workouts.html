@@ -9,7 +9,7 @@
     <div class="container mt-4">
         <div class="container custom-margin">
             <h1 class="pb-3 text-center">Upcoming Workouts</h1>
-            <div class="row align-items-center">
+                <div class="row align-items-center">
                 
                     {% for workout in workouts_data %}
                         <div class="yellow-outline-box container mt-4">
@@ -21,24 +21,41 @@
                             hx-swap="outerHTML">
                                 Change Workout
                             </button>
-                            <p class="pt-3"><strong>Goal:</strong> {{ workout.goal }}</p>
+                            {% comment %} <hr class="pt-3"> {% endcomment %}
+                            <p class='mt-4'><strong>Goal:</strong> {{ workout.goal }}</p>
+                            <hr>
                             <p><strong>Date:</strong> {{ workout.date }}</p>
+                            <hr>
                             <p><strong>Description:</strong> {{ workout.description }}</p>
+                            <hr>
                             <p><strong>Warm-Up:</strong> {{ workout.warm_up }}</p>
-                            <h4>Workout</h4>
+                            
+                            <div class='faint-white-box mt-5'>
+                                <h2 class="text-center">Workout</h2>
                             {% for exercise in workout.exercises %}
                                 {% comment %} <li id="exercise-{{ exercise.id }}"> {% endcomment %}
                                     <p><strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}<p>
                                     {% if exercise.recommended_weight %}
                                         <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
                                     {% endif %}
-                                    <em>{{ exercise.description }}</em>
+                                    <em class="pb-3">{{ exercise.description }}</em>
+                                    <br>
+                                    <br>
+                                    <button 
+                                    class="btn btn-warning btn-sm"
+                                    hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
+                                    hx-target="#exercise-{{ exercise.id }}" 
+                                    hx-swap="outerHTML">
+                                    Change Exercise
+                                </button>
                                 {% comment %} </li> {% endcomment %}
+
                                 <hr>
                             {% endfor %}
+                            </div>
                             <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
-                            <hr>
-                            <br>
+                            {% comment %} <hr>
+                            <br> {% endcomment %}
                         </div>
                     {% endfor %}
                 <br>
@@ -46,6 +63,6 @@
         </div>
     </div>
 </div>
-{% comment %} </div> {% endcomment %}
+
 
 {% endblock %}

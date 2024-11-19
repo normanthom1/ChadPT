@@ -120,6 +120,8 @@ def homepage(request):
                     weight_history,
                     workout_sessions,
                 )
+                print('payload')
+                print(payload_text)
                 # Send request to Gemini API
                 api_key = os.getenv('GEMINI_API')
                 genai.configure(api_key=api_key)
@@ -201,7 +203,9 @@ def homepage(request):
             'form': form,
             'form_title': 'Workout Planner',
             'form_id': 'workout-form',
-            'personal_details_form': personal_details_form
+            'personal_details_form': personal_details_form,
+            'personal_details_title': 'Update personal details',
+            'personal_details_id': 'update-personal-details-form'
         })
 
     return render(request, "homepage.html", context)
@@ -236,7 +240,7 @@ def signup(request):
     else:
         form = CustomUserCreationForm()
 
-    return render(request, 'form_template.html', {
+    return render(request, 'signup.html', {
         'form': form,
         'form_title': 'Sign Up',
         'form_id': 'sign-up-form',
