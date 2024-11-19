@@ -193,133 +193,41 @@
             </div>
         </div>
     </div>
-</div>
+</div class="mb-5">
 
-<div class="d-flex flex-column align-items-center justify-content-center pt-5 pb-5"; id="personal-details"; 
-style="background-image: url('{% static 'images/Fitness.jpg' %}');
-       background-size: cover; 
-       background-position: center; 
-       min-height: 100vh; 
-       text-align: center; 
-       color: black; 
-       overflow: auto;">
-<h1>Update Personal Details</h1>
-<div class="faint-white-box">
-    <form method="POST" enctype="multipart/form-data" id="{{ personal_details_id }}" class="needs-validation" novalidate>
-        {% csrf_token %}
-        <div class="row">
-            <!-- Left Column -->
-            <div class="col-12 col-md-6 pr-3">
-                {% for field in personal_details_form %}
-                    {% if field.name == "preferred_workout_time" %}
-                        <div class="form-group mb-3">
-                            {{ field.label_tag }}
-                            {% if field.field.widget.input_type == "select" %}
-                                {{ field|add_class:"form-control" }}
-                            {% else %}
-                                {{ field }}
-                            {% endif %}
-                        </div>
-                        <!-- End left column when 'Preferred Workout Time' is reached -->
-                        </div>
-                        <!-- Right Column -->
-                        <div class="col-12 col-md-6">
-                    {% else %}
-                        <div class="form-group mb-3">
-                            {{ field.label_tag }}
-                            {% if field.field.widget.input_type == "checkbox" %}
-                                <div class="form-check">
-                                    <div class="checkbox-container faint-white-box" style="max-height: 300px; overflow-y: auto; text-align: left;">
-                                        {% for widget in field %}
-                                            <div class="form-check">
-                                                {{ widget.tag }} {{ widget.choice_label }}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% elif field.field.widget.input_type == "select" %}
-                                {% if field.field.widget.attrs.multiple %}
-                                    <select class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" multiple size="10">
-                                        {% for option in field %}
-                                            <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
-                                                {{ option.label }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                {% else %}
-                                    {{ field|add_class:"form-control" }}
-                                {% endif %}
-                            {% else %}
-                                {{ field|add_class:"form-control" }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
+
+<div class="d-flex flex-column align-items-center justify-content-center pt-5 pb-5" id="personal-details"
+     style="background-image: url('{% static 'images/Fitness.jpg' %}'); 
+            background-size: cover; 
+            background-position: center; 
+            min-height: 100vh; 
+            text-align: center; 
+            color: black; 
+            overflow: auto;">
+    <div class="faint-white-box">
+        <div id="personal-details-container">
+            <!-- Display Personal Details -->
+            <h2>Your Personal Details</h2>
+            <p>First Name: {{ user_details.firstname }}</p>
+            <p>Last Name: {{ user_details.lastname }}</p>
+            <p>Date of Birth: {{ user_details.dob }}</p>
+            <p>Current Injuries: {{ user_details.current_injuries }}</p>
+            <p>Workout Preferences: {{ user_details.workout_preferences }}</p>
+            <p>Preferred Location: {{ user_details.preferred_location }}</p>
+            <p>Workouts Per Week: {{ user_details.workouts_per_week }}</p>
+            <p>Preferred Workout Time: {{ user_details.preferred_workout_time }}</p>
+            <p>Fitness Goals: {{ user_details.fitness_goals }}</p>
+            <p>Specific Muscle Groups: {{ user_details.specific_muscle_groups }}</p>
+            <p>Cardio Preferences: {{ user_details.cardio_preferences }}</p>
+            <p>Recovery and Rest: {{ user_details.recovery_and_rest }}</p>
+            <button hx-get="{% url 'update_personal_details' %}" 
+                    hx-target="#personal-details-container" 
+                    hx-swap="innerHTML" 
+                    class="btn btn-warning mt-3">Update Personal Details</button>
         </div>
-        <br>
-        <div class="container text-center">
-            <button type="submit" class="btn btn-warning mt-3 btn-block">Update</button>
-        </div>
-    </form>
-</div>
+    </div>
 </div>
 
 
-{% comment %} <div class="d-flex flex-column align-items-center justify-content-center pt-5 pb-5" 
-    style="background-image:  url('{% static 'images/Fitness.jpg' %}');
-           background-size: cover; 
-           background-position: center; 
-           min-height: 100vh; 
-           text-align: center; 
-           color: black; 
-           overflow: auto;">
-            <h1>Update Personal Details</h1>
-            <div class="faint-white-box">
-                
-                <form method="POST" enctype="multipart/form-data" id="{{ personal_details_id }}" class="needs-validation" novalidate>
-                    {% csrf_token %}
-                    
-                    {% for field in personal_details_form %}
-                        <div class="form-group mb-3">
-                            {{ field.label_tag }}
-                            
-                            {% if field.field.widget.input_type == "checkbox" %}
-                                <!-- Custom checkbox layout with scrollable container -->
-                                <div class="form-check">
-                                    <div class="checkbox-container" style="max-height: 300px; overflow-y: auto; text-align: left;">
-                                        {% for widget in field %}
-                                            <div class="form-check">
-                                                {{ widget.tag }} {{ widget.choice_label }}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% elif field.field.widget.input_type == "select" %}
-                                {% if field.field.widget.attrs.multiple %}
-                                    <!-- Multi-select dropdown with scrollable options -->
-                                    <select class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" multiple size="10">
-                                        {% for option in field %}
-                                            <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
-                                                {{ option.label }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                {% else %}
-                                    {{ field|add_class:"form-control" }}
-                                {% endif %}
-                            {% else %}
-                                {{ field|add_class:"form-control" }}
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                    <br>
-                    <div class="container">
-                        <button type="submit" class="btn btn-warning mt-3 btn-block">Update</button>
-                    </div>
-                </form>
-        </div>
-</div> {% endcomment %}
 
-{% comment %} <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Sign Up</button> {% endcomment %}
 {% endblock %}

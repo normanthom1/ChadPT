@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block content %}
+{% load static %}  <!-- Ensure this is loaded -->
+{% load widget_tweaks %}
 
 
 <div class="d-flex flex-column align-items-center justify-content-center mt-5 pt-5" 
@@ -8,6 +9,7 @@
            color: black;">
     <div class="container mt-4">
         <div class="container custom-margin">
+            
             <h1 class="pb-3 text-center">Upcoming Workouts</h1>
                 <div class="row align-items-center">
                 
@@ -15,11 +17,11 @@
                         <div class="yellow-outline-box container mt-4">
                         {% comment %} <div class="workout-card" id="workout-{{ workout.id }}"> {% endcomment %}
                             <h3 class="pb-3">{{ workout.name }}</h3>
-                            <button class="btn btn-warning mt-3 btn-block" style="font-size: 20px;"
-                            hx-post="{% url 'replace_workout' workout.id %}" 
-                            hx-target="#workout-{{ workout.id }}" 
-                            hx-swap="outerHTML">
-                                Change Workout
+                            <button class="btn btn-warning bt-sm mt-3 btn-block" style="font-size: 20px;"
+                                hx-post="{% url 'replace_workout' workout.id %}" 
+                                hx-target="#workout-{{ workout.id }}" 
+                                hx-swap="outerHTML">
+                                    Change Workout
                             </button>
                             {% comment %} <hr class="pt-3"> {% endcomment %}
                             <p class='mt-4'><strong>Goal:</strong> {{ workout.goal }}</p>
@@ -31,7 +33,9 @@
                             <p><strong>Warm-Up:</strong> {{ workout.warm_up }}</p>
                             
                             <div class='faint-white-box mt-5'>
-                                <h2 class="text-center">Workout</h2>
+                                <div class="text-center mb-4">
+                                    <h2>Workout</h2>
+                                  </div>
                             {% for exercise in workout.exercises %}
                                 {% comment %} <li id="exercise-{{ exercise.id }}"> {% endcomment %}
                                     <p><strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}<p>

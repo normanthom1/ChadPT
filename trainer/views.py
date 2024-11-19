@@ -182,12 +182,27 @@ def homepage(request):
 
         ###################Personal Details Form#######################
         # Initialize the personal details form
-        user_preference, created = UserPreference.objects.get_or_create(user=request.user)
-        personal_details_form = UserUpdateForm(request.POST or None, instance=user_preference)
-        if request.method == 'POST' and personal_details_form.is_valid():
-            personal_details_form.save()
-            messages.success(request, 'Your profile has been updated successfully!')
-            return redirect('homepage')
+        preferences, created = UserPreference.objects.get_or_create(user=request.user)
+        # Prepare user details
+        user_details = {
+            'firstname': preferences.firstname,
+            'lastname': preferences.lastname,
+            'dob': preferences.dob,
+            'current_injuries': preferences.current_injuries,
+            'workout_preferences': ', '.join(preferences.workout_preferences or []),
+            'preferred_location': preferences.preferred_location.name if preferences.preferred_location else 'Not specified',
+            'workouts_per_week': preferences.workouts_per_week,
+            'preferred_workout_time': preferences.preferred_workout_time,
+            'fitness_goals': ', '.join(preferences.fitness_goals or []),
+            'specific_muscle_groups': preferences.specific_muscle_groups,#', '.join(preferences.specific_muscle_groups or []),
+            'cardio_preferences': preferences.cardio_preferences,#', '.join(preferences.cardio_preferences or []),
+            'recovery_and_rest': preferences.recovery_and_rest#', '.join(preferences.recovery_and_rest or []),
+        }
+        # personal_details_form = UserUpdateForm(request.POST or None, instance=user_preference)
+        # if request.method == 'POST' and personal_details_form.is_valid():
+        #     personal_details_form.save()
+        #     messages.success(request, 'Your profile has been updated successfully!')
+        #     return redirect('homepage')
     
 
         context.update({
@@ -203,9 +218,10 @@ def homepage(request):
             'form': form,
             'form_title': 'Workout Planner',
             'form_id': 'workout-form',
-            'personal_details_form': personal_details_form,
-            'personal_details_title': 'Update personal details',
-            'personal_details_id': 'update-personal-details-form'
+            "user_details": user_details,
+            # 'personal_details_form': personal_details_form,
+            # 'personal_details_title': 'Update personal details',
+            # 'personal_details_id': 'update-personal-details-form'
         })
 
     return render(request, "homepage.html", context)
@@ -603,3 +619,19 @@ def update_workout_session(request, pk):
         'workout': workout,
     }
     return render(request, 'update_workout_session.html', context)
+
+
+def update_personal_details(request):
+    user_preference, created = UserPreference.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        personal_details_form = UserUpdateForm(request.POST, instance=user_preference)
+        if personal_details_form.is_valid():
+            personal_details_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return JsonResponse({'success': True, 'message': 'Profile updated successfully!'})
+    else:
+        personal_details_form = UserUpdateForm(instance=user_preference)
+
+    return render(request, 'partials/update_personal_details_form.html', {
+        'personal_details_form': personal_details_form,
+    })
