@@ -162,22 +162,22 @@ class UserUpdateForm(forms.ModelForm):
         required=False
     )
     fitness_goals = forms.MultipleChoiceField(
-        choices=FITNESS_GOAL_CHOICES,
+        choices=FITNESS_GOAL_CHOICES, 
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
     specific_muscle_groups = forms.MultipleChoiceField(
-        choices=MUSCLE_GROUP_CHOICES,
+        choices=MUSCLE_GROUP_CHOICES, 
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
     cardio_preferences = forms.MultipleChoiceField(
-        choices=CARDIO_PREFERENCE_CHOICES,
+        choices=CARDIO_PREFERENCE_CHOICES, 
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
     recovery_and_rest = forms.MultipleChoiceField(
-        choices=RECOVERY_AND_REST_CHOICES,
+        choices=RECOVERY_AND_REST_CHOICES, 
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -197,7 +197,7 @@ class UserUpdateForm(forms.ModelForm):
     def save(self, commit=True):
         # Save CustomUser fields
         user = self.instance.user
-        user.email = self.cleaned_data['email']
+        # user.email = self.cleaned_data['email']
         user.first_name = self.cleaned_data['firstname']
         user.last_name = self.cleaned_data['lastname']
         if commit:

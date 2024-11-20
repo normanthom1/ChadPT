@@ -22,4 +22,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('workout/<int:pk>/update/', views.update_workout_session, name='update_workout_session'),
     path('update-personal-details/', views.update_personal_details, name='update_personal_details'),
+    path('create-workout-form/', views.create_workout_form_view, name='create_workout_form'),
+    path('personal_details/', views.personal_details, name='personal_details'),
 ]

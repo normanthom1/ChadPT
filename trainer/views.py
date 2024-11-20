@@ -89,97 +89,6 @@ def homepage(request):
         if preferences.workout_preferences:  # Check if fitness_goals is not empty or None
             preferences.workout_preferences = ', '.join(preferences.workout_preferences)
 
-        ############### Gemini Logic Here #################################
-        if request.method == "POST":
-            form = WorkoutPlanForm(request.POST)
-            if form.is_valid():
-                print("Form is valid:", form.cleaned_data)
-                user = request.user
-                preferences = get_object_or_404(UserPreference, user=user)
-                weight_history = WeightHistory.objects.filter(user=preferences).order_by('-date')[:20]
-                workout_sessions = WorkoutSession.objects.filter(user=preferences).order_by('-date')[:15]
-
-                # Get preferred workout type, location, and length from form or defaults
-                preferred_workout_type = form.cleaned_data.get('preferred_workout_type') or ', '.join(preferences.workout_preferences)
-                preferred_location = form.cleaned_data.get('preferred_location') or preferences.preferred_location
-                workout_length = form.cleaned_data.get('workout_length') or preferences.preferred_workout_time
-                start_date = form.cleaned_data.get('start_date')
-                
-                # Determine plan duration in days
-                plan_duration_value = form.cleaned_data.get('plan_duration')
-                plan_duration = 1 if plan_duration_value == 'day' else 7
-
-                # Construct payload text for Gemini API request
-                payload_text = workout_payload_text(
-                    plan_duration_value,
-                    start_date,
-                    preferences,
-                    preferred_workout_type,
-                    workout_length,
-                    preferred_location,
-                    weight_history,
-                    workout_sessions,
-                )
-                print('payload')
-                print(payload_text)
-                # Send request to Gemini API
-                api_key = os.getenv('GEMINI_API')
-                genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
-                response = model.generate_content(payload_text)
-                try:
-                    print(response.text)
-                    # Parse JSON response and save workouts to database
-                    workout_data = convert_text_to_json(response.text)
-                    print("JSOOOOOON")
-                    print(workout_data)
-                    print(response.text)
-                    generate_group_id = generate_random_id()
-                    Query.objects.create(
-                        group_id = generate_group_id,
-                        user = CustomUser.objects.filter(email=request.user.email).first(),
-                        query = payload_text
-                    )
-                    
-                    for workout in workout_data:
-                        workout_session = WorkoutSession.objects.create(
-                            group_id=generate_group_id,
-                            user=preferences,
-                            location=preferred_location,
-                            name=workout.get('name'),
-                            goal=workout.get('goal'),
-                            date=workout.get('date'),
-                            description=workout.get('explanation'),
-                            workout_type=workout.get('workout_type'),
-                        )
-
-                        WarmUp.objects.create(workout=workout_session, description=workout.get('warm_up'))
-                        CoolDown.objects.create(workout=workout_session, description=workout.get('cool_down'))
-
-                        for exercise in workout.get('exercises', []):
-                            Exercise.objects.create(
-                                workout=workout_session,
-                                name=exercise.get('name'),
-                                sets=exercise.get('sets'),
-                                reps=exercise.get('reps'),
-                                description=exercise.get('description'),
-                                recommended_weight=exercise.get('recommended_weight'),
-                                actual_weight=exercise.get('recommended_weight')
-                            )
-
-                    return redirect('upcoming_workouts', group_id=generate_group_id)
-
-                except requests.exceptions.RequestException as e:
-                    return JsonResponse({"error": f"Error sending request to Gemini: {str(e)}"}, status=500)
-
-        else:
-            form = WorkoutPlanForm()
-
-        ############### Gemini Logic Here #################################
-
-
-
-
         ###################Personal Details Form#######################
         # Initialize the personal details form
         preferences, created = UserPreference.objects.get_or_create(user=request.user)
@@ -197,13 +106,7 @@ def homepage(request):
             'specific_muscle_groups': preferences.specific_muscle_groups,#', '.join(preferences.specific_muscle_groups or []),
             'cardio_preferences': preferences.cardio_preferences,#', '.join(preferences.cardio_preferences or []),
             'recovery_and_rest': preferences.recovery_and_rest#', '.join(preferences.recovery_and_rest or []),
-        }
-        # personal_details_form = UserUpdateForm(request.POST or None, instance=user_preference)
-        # if request.method == 'POST' and personal_details_form.is_valid():
-        #     personal_details_form.save()
-        #     messages.success(request, 'Your profile has been updated successfully!')
-        #     return redirect('homepage')
-    
+        }    
 
         context.update({
             "user": user,
@@ -215,13 +118,7 @@ def homepage(request):
             "weight_data": weight_data,
             "next_workout": next_workout,
             'next_workout_exercises': next_workout_exercises,
-            'form': form,
-            'form_title': 'Workout Planner',
-            'form_id': 'workout-form',
             "user_details": user_details,
-            # 'personal_details_form': personal_details_form,
-            # 'personal_details_title': 'Update personal details',
-            # 'personal_details_id': 'update-personal-details-form'
         })
 
     return render(request, "homepage.html", context)
@@ -623,15 +520,101 @@ def update_workout_session(request, pk):
 
 def update_personal_details(request):
     user_preference, created = UserPreference.objects.get_or_create(user=request.user)
+
     if request.method == 'POST':
-        personal_details_form = UserUpdateForm(request.POST, instance=user_preference)
+        post_data = request.POST.copy()  # Create a mutable copy of the POST data
+
+        # Ensure multi-select fields are passed as lists
+        multi_select_fields = ['specific_muscle_groups', 'cardio_preferences', 'recovery_and_rest']
+        for field in multi_select_fields:
+            post_data.setlist(field, request.POST.getlist(field))
+
+        # Pass cleaned data to the form
+        personal_details_form = UserUpdateForm(post_data, instance=user_preference)
+
         if personal_details_form.is_valid():
             personal_details_form.save()
             messages.success(request, 'Your profile has been updated successfully!')
-            return JsonResponse({'success': True, 'message': 'Profile updated successfully!'})
+
+            # Return the updated personal details partial as HTML response
+            return render(request, 'partials/personal_details.html', {
+                'user_details': user_preference  # Ensure user details are passed to the partial
+            })
+        else:
+            messages.error(request, 'There was an error updating your profile.')
+
     else:
+        # When it's a GET request (or cancel), render the update form
         personal_details_form = UserUpdateForm(instance=user_preference)
 
-    return render(request, 'partials/update_personal_details_form.html', {
-        'personal_details_form': personal_details_form,
+        return render(request, 'partials/update_personal_details_form.html', {
+            'personal_details_form': personal_details_form,
+        })
+
+
+
+
+def personal_details(request):
+    user_preference, created = UserPreference.objects.get_or_create(user=request.user)
+    return render(request, 'partials/personal_details.html', {
+        'user_details': user_preference,
     })
+
+
+def create_workout_form_view(request):
+    if request.method == "POST":
+        form = WorkoutPlanForm(request.POST)
+        if form.is_valid():
+            user = request.user
+            preferences = get_object_or_404(UserPreference, user=user)
+            weight_history = WeightHistory.objects.filter(user=preferences).order_by('-date')[:20]
+            workout_sessions = WorkoutSession.objects.filter(user=preferences).order_by('-date')[:15]
+
+            # Get preferred workout type, location, and length from form or defaults
+            preferred_workout_type = form.cleaned_data.get('preferred_workout_type') or ', '.join(preferences.workout_preferences)
+            preferred_location = form.cleaned_data.get('preferred_location') or preferences.preferred_location
+            workout_length = form.cleaned_data.get('workout_length') or preferences.preferred_workout_time
+            start_date = form.cleaned_data.get('start_date')
+            
+            # Determine plan duration in days
+            plan_duration_value = form.cleaned_data.get('plan_duration')
+            plan_duration = 1 if plan_duration_value == 'day' else 7
+
+            # Construct p = ayload text for Gemini API request
+            payload_text = workout_payload_text(
+                plan_duration_value,
+                start_date,
+                preferences,
+                preferred_workout_type,
+                workout_length,
+                preferred_location,
+                weight_history,
+                workout_sessions,
+            )
+            print(payload_text)
+            api_key = os.getenv('GEMINI_API')
+            print(api_key)
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(payload_text)
+            print(response.text)
+            workout_data = convert_text_to_json(response.text)
+            group_id = generate_random_id()
+            for workout in workout_data:
+                workout_session = WorkoutSession.objects.create(
+                    group_id=group_id,
+                    user=preferences,
+                    name=workout['name'],
+                    goal=workout['goal'],
+                    date=workout['date'],
+                    description=workout['explanation']
+                )
+                WarmUp.objects.create(workout=workout_session, description=workout['warm_up'])
+                CoolDown.objects.create(workout=workout_session, description=workout['cool_down'])
+                for exercise in workout['exercises']:
+                    Exercise.objects.create(workout=workout_session, **exercise)
+            return redirect('upcoming_workouts', group_id=group_id)
+    else:
+        form = WorkoutPlanForm()
+    
+    return render(request, 'partials/create_workout_form.html', {'form': form})

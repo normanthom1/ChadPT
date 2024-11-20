@@ -120,24 +120,27 @@ class UserPreference(models.Model):
         related_name='users',
         blank=True,
     )
-    specific_muscle_groups = models.CharField(
-        max_length=100,
-        choices=MUSCLE_GROUP_CHOICES,
-        blank=True,
-        null=True,
-    )
-    cardio_preferences = models.CharField(
-        max_length=50,
-        choices=CARDIO_PREFERENCE_CHOICES,
-        blank=True,
-        null=True,
-    )
-    recovery_and_rest = models.CharField(
-        max_length=20,
-        choices=RECOVERY_AND_REST_CHOICES,
-        blank=True,
-        null=True,
-    )
+    # specific_muscle_groups = models.CharField(
+    #     max_length=100,
+    #     choices=MUSCLE_GROUP_CHOICES,
+    #     blank=True,
+    #     null=True,
+    # )
+    # cardio_preferences = models.CharField(
+    #     max_length=50,
+    #     choices=CARDIO_PREFERENCE_CHOICES,
+    #     blank=True,
+    #     null=True,
+    # )
+    # recovery_and_rest = models.CharField(
+    #     max_length=20,
+    #     choices=RECOVERY_AND_REST_CHOICES,
+    #     blank=True,
+    #     null=True,
+    # )
+    specific_muscle_groups = models.JSONField(blank=True, null=True)  # Store a list of values
+    cardio_preferences = models.JSONField(blank=True, null=True)
+    recovery_and_rest = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
