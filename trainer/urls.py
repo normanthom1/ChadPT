@@ -7,7 +7,6 @@ urlpatterns = [
     path('', views.homepage, name='homepage'),
     path('workout-plan/', views.workout_plan, name='workout_plan'),
     path('signup/', views.signup, name='signup'),
-    path('generate-workout/', views.send_user_data_to_gemini, name='generate_workout'),
     path('workout-plan/', views.workout_plan_result, name='workout_plan_result'),
     path('locations/new/', views.location_create, name='location_create'),  # Create view
     path('locations/<int:pk>/edit/', views.location_update, name='location_update'),  # Update view

@@ -11,6 +11,30 @@ EQUIPMENT_GROUP_CHOICES = [
     ('Miscellaneous', 'Miscellaneous')
 ]
 
+QUOTES = [
+    {"quote": "The only bad workout is the one that didn’t happen.", "author": None},
+    {"quote": "Take care of your body. It’s the only place you have to live.", "author": "Jim Rohn"},
+    {"quote": "Exercise is a celebration of what your body can do, not a punishment for what you ate.", "author": None},
+    {"quote": "The pain you feel today will be the strength you feel tomorrow.", "author": None},
+    {"quote": "Push yourself, because no one else is going to do it for you.", "author": None},
+    {"quote": "Sweat is fat crying.", "author": None},
+    {"quote": "Success usually comes to those who are too busy to be looking for it.", "author": "Henry David Thoreau"},
+    {"quote": "Fitness is not about being better than someone else. It’s about being better than you used to be.", "author": None},
+    {"quote": "Motivation is what gets you started. Habit is what keeps you going.", "author": "Jim Ryun"},
+    {"quote": "The body achieves what the mind believes.", "author": None},
+    {"quote": "What hurts today makes you stronger tomorrow.", "author": "Jay Cutler"},
+    {"quote": "Your body can stand almost anything. It’s your mind that you have to convince.", "author": None},
+    {"quote": "Train insane or remain the same.", "author": None},
+    {"quote": "The only way to define your limits is by going beyond them.", "author": "Arthur C. Clarke"},
+    {"quote": "The only bad workout is the one you didn’t do.", "author": None},
+    {"quote": "Strength does not come from physical capacity. It comes from an indomitable will.", "author": "Mahatma Gandhi"},
+    {"quote": "Success is usually the culmination of controlling failure.", "author": "Sylvester Stallone"},
+    {"quote": "You don’t have to be extreme, just consistent.", "author": None},
+    {"quote": "Don’t limit your challenges, challenge your limits.", "author": None},
+    {"quote": "Nothing will work unless you do.", "author": "Maya Angelou"}
+    # Add more quotes as desired
+]
+
 EQUIPMENT_CHOICES = [
     # Public Park Equipment
     ('Pull-Up Bar', 'Public Park Equipment'),
@@ -162,154 +186,43 @@ EQUIPMENT_CHOICES = [
 ]
 
 
-FITNESS_GOAL_CHOICES = sorted([
-    ('increase_strength', 'Increase Strength'),
-    ('improve_muscle_gain', 'Improve Muscle Gain'),
-    ('increase_endurance', 'Increase Endurance'),
-    ('improve_flexibility', 'Improve Flexibility'),
-    ('enhance_mobility', 'Enhance Mobility'),
-    ('improve_cardio_health', 'Improve Cardiovascular Health'),
-    ('increase_core_strength', 'Increase Core Strength'),
-    ('improve_stability', 'Improve Stability'),
-    ('improve_balance', 'Improve Balance'),
-    ('improve_posture', 'Improve Posture'),
-    ('increase_functional_fitness', 'Increase Functional Fitness'),
-    ('enhance_athletic_performance', 'Enhance Athletic Performance'),
-    ('speed_up_injury_recovery', 'Speed Up Injury Recovery'),
-    ('improve_body_composition', 'Improve Body Composition'),
-    ('increase_sprint_speed', 'Increase Sprint Speed'),
-    ('develop_power', 'Develop Power'),
-    ('improve_agility', 'Improve Agility'),
-    ('boost_coordination', 'Boost Coordination'),
-    ('maintain_healthy_weight', 'Maintain Healthy Weight'),
-    ('increase_flexibility_and_strength', 'Increase Flexibility and Strength'),
-    ('improve_endurance_racing_performance', 'Improve Endurance Racing Performance'),
-    ('enhance_sports_performance', 'Enhance Sports Performance'),
-    ('improve_postpartum_recovery', 'Improve Postpartum Recovery'),
-    ('optimize_functional_movement', 'Optimize Functional Movement'),
-    ('increase_stamina', 'Increase Stamina'),
-    ('focus_on_longevity', 'Focus on Longevity'),
-    ('master_bodyweight_exercises', 'Master Bodyweight Exercises'),
-    ('increase_kickboxing_fitness', 'Increase Kickboxing Fitness'),
-    ('improve_boxing_fitness', 'Improve Boxing Fitness'),
-    ('improve_aerobics_fitness', 'Improve Aerobics Fitness'),
-    ('build_strength_in_bodybuilding', 'Build Strength in Bodybuilding'),
-    ('improve_calisthenics_skills', 'Improve Calisthenics Skills'),
-    ('improve_powerlifting_skills', 'Improve Powerlifting Skills'),
-    ('focus_on_strength_training', 'Focus on Strength Training'),
-    ('improve_posture_in_yoga', 'Improve Posture in Yoga'),
-    ('boost_flexibility_in_stretching', 'Boost Flexibility in Stretching'),
-    ('enhance_walking_fitness', 'Enhance Walking Fitness'),
-    ('improve_running_fitness', 'Improve Running Fitness'),
-    ('improve_resistance_training', 'Improve Resistance Training'),
-    ('focus_on_low_impact_fitness', 'Focus on Low Impact Fitness'),
-])
 
-# workout preference choices
-WORKOUT_PREFERENCE_CHOICES = [
-    ('aerobics', 'Aerobics'),
-    ('barre', 'Barre'),
-    ('bodybuilding', 'Bodybuilding'),
-    ('bootcamp', 'Bootcamp'),
-    ('boxing', 'Boxing'),
-    ('calisthenics', 'Calisthenics'),
-    ('circuit', 'Circuit Training'),
-    ('crossfit', 'CrossFit'),
-    ('crossfit_partner', 'CrossFit Partner Workouts'),
-    ('cycling', 'Indoor Cycling/Spin'),
-    ('f45', 'F45 Training'),
-    ('functional', 'Functional Training'),
-    ('hiit', 'HIIT (High-Intensity Interval Training)'),
-    ('kickboxing', 'Kickboxing'),
-    ('mobility', 'Mobility/Flexibility'),
-    ('pilates', 'Pilates'),
-    ('plyometrics', 'Plyometrics'),
-    ('powerlifting', 'Powerlifting'),
-    ('strength', 'Strength Training'),
-    ('tabata', 'Tabata Training'),
-    ('yoga', 'Yoga'),
-]
-# Preferred Workout Intensity Answers
-LOW = 'Low'
-MODERATE = 'Moderate'
-HIGH = 'High'
-WORKOUT_INTENSITY_CHOICES = [
-    (LOW, 'Low'),
-    (MODERATE, 'Moderate'),
-    (HIGH, 'High'),
-]
-
-# Fitness Level Answers
-BEGINNER = 'Beginner'
-INTERMEDIATE = 'Intermediate'
-ADVANCED = 'Advanced'
-FITNESS_LEVEL_CHOICES = [
-    (BEGINNER, 'Beginner'),
-    (INTERMEDIATE, 'Intermediate'),
-    (ADVANCED, 'Advanced')
-]
-
-# Specific Muscle Groups to Focus On
-UPPER_BODY = 'Upper Body'
-LOWER_BODY = 'Lower Body'
-CORE = 'Core'
-FULL_BODY = 'Full Body'
-FULL_BODY_TARGETTED = 'Full Body (Individual Workouts should target specific muscel groups)'
-MUSCLE_GROUP_CHOICES = [
-    (UPPER_BODY, 'Upper Body'),
-    (LOWER_BODY, 'Lower Body'),
-    (CORE, 'Core'),
-    (FULL_BODY, 'Full Body'),
-    (FULL_BODY_TARGETTED, FULL_BODY_TARGETTED)
-]
-
-# Cardio Preferences
-HIIT = 'HIIT'
-MODERATE_INTENSITY = 'Moderate Intensity'
-LOW_IMPACT = 'Low Impact'
-FUNCTIONAL_CIRCUITS = 'Functional/Cardio Circuits'
-CARDIO_PREFERENCE_CHOICES = [
-    (HIIT, 'High-Intensity Interval Training (HIIT)'),
-    (MODERATE_INTENSITY, 'Moderate Intensity'),
-    (LOW_IMPACT, 'Low Impact'),
-    (FUNCTIONAL_CIRCUITS, 'Functional/Cardio Circuits'),
-]
-
-# Recovery and Rest
-ACTIVE_RECOVERY = 'Active Recovery'
-FULL_REST = 'Full Rest'
-RECOVERY_TECHNIQUES = 'Recovery Techniques'
-RECOVERY_AND_REST_CHOICES = [
-    (ACTIVE_RECOVERY, 'Active Recovery Days'),
-    (FULL_REST, 'Full Rest Days'),
-    (RECOVERY_TECHNIQUES, 'Recovery Techniques'),
+EATING_HABITS_CHOICES = [
+    ('poor', 'Poor – Frequent junk food and limited fruits/vegetables.'),
+    ('fair', 'Fair – Balanced meals but occasional unhealthy snacks.'),
+    ('average', 'Average – Mix of healthy and unhealthy meals.'),
+    ('good', 'Good – Mostly balanced meals with occasional indulgences.'),
+    ('excellent', 'Excellent – Consistently balanced, nutrient-rich diet.'),
 ]
 
 WORKOUT_TIME_CHOICES = [(str(i), f"{i} minutes") for i in range(10, 151, 5)]
 
+FITNESS_LEVEL_CHOICES = [
+    ('beginner', 'Beginner - Just starting out or returning after a long break, with limited experience.'),
+    ('intermediate', 'Intermediate - Some experience with regular exercise and a moderate level of fitness.'),
+    ('advanced', 'Advanced - Extensive experience, high level of fitness, and familiarity with intense workouts.'),
+    ('elite', 'Elite - Exceptional fitness and performance at a professional or near-professional level.'),
+]
 
-QUOTES = [
-    {"quote": "The only bad workout is the one that didn’t happen.", "author": None},
-    {"quote": "Take care of your body. It’s the only place you have to live.", "author": "Jim Rohn"},
-    {"quote": "Exercise is a celebration of what your body can do, not a punishment for what you ate.", "author": None},
-    {"quote": "The pain you feel today will be the strength you feel tomorrow.", "author": None},
-    {"quote": "Push yourself, because no one else is going to do it for you.", "author": None},
-    {"quote": "Sweat is fat crying.", "author": None},
-    {"quote": "Success usually comes to those who are too busy to be looking for it.", "author": "Henry David Thoreau"},
-    {"quote": "Fitness is not about being better than someone else. It’s about being better than you used to be.", "author": None},
-    {"quote": "Motivation is what gets you started. Habit is what keeps you going.", "author": "Jim Ryun"},
-    {"quote": "The body achieves what the mind believes.", "author": None},
-    {"quote": "What hurts today makes you stronger tomorrow.", "author": "Jay Cutler"},
-    {"quote": "Your body can stand almost anything. It’s your mind that you have to convince.", "author": None},
-    {"quote": "Train insane or remain the same.", "author": None},
-    {"quote": "The only way to define your limits is by going beyond them.", "author": "Arthur C. Clarke"},
-    {"quote": "The only bad workout is the one you didn’t do.", "author": None},
-    {"quote": "Strength does not come from physical capacity. It comes from an indomitable will.", "author": "Mahatma Gandhi"},
-    {"quote": "Success is usually the culmination of controlling failure.", "author": "Sylvester Stallone"},
-    {"quote": "You don’t have to be extreme, just consistent.", "author": None},
-    {"quote": "Don’t limit your challenges, challenge your limits.", "author": None},
-    {"quote": "Nothing will work unless you do.", "author": "Maya Angelou"}
-    # Add more quotes as desired
+WORKOUT_TYPE_PREFERENCE_CHOICES = [
+    ('functional', 'Improve everyday movement (Functional training)'),
+    ('targeted', 'Build specific muscles (Targeted training)'),
+    ('both', 'Combination of both (Functional and targeted training)'),
+]
+
+# Choices for preferred workout intensity
+WORKOUT_INTENSITY_CHOICES = [
+    ('low', 'Low - Relaxed activities focusing on recovery, flexibility, or light effort.'),
+    ('moderate', 'Moderate - A balanced intensity that improves endurance and strength without overexertion.'),
+    ('high', 'High - Challenging intensity, pushing limits to achieve greater fitness and performance gains.'),
+    ('extreme', 'Extreme - Very intense workouts for peak performance and competitive goals.'),
+]
+
+GENDER_CHOICES=[
+    ('male', 'Male'),
+    ('female', 'Female'),
+    ('other', 'Other'),
+    ('prefer_not_to_say', 'Prefer not to say'),
 ]
 
 PLAN_DURATION_CHOICES = [
@@ -317,26 +230,27 @@ PLAN_DURATION_CHOICES = [
     ('week', 'One Week'),
 ]
 
-WORKOUT_TYPE_CHOICES = [('', 'Select a Workout Type')] + sorted([
-    ('aerobics', 'Aerobics'),
-    ('barre', 'Barre'),
-    ('bodybuilding', 'Bodybuilding'),
-    ('bootcamp', 'Bootcamp'),
-    ('boxing', 'Boxing'),
-    ('calisthenics', 'Calisthenics'),
-    ('circuit', 'Circuit Training'),
-    ('crossfit', 'CrossFit'),
-    ('crossfit_partner', 'CrossFit Partner Workouts'),
-    ('cycling', 'Indoor Cycling/Spin'),
-    ('f45', 'F45 Training'),
-    ('functional', 'Functional Training'),
-    ('hiit', 'HIIT (High-Intensity Interval Training)'),
-    ('kickboxing', 'Kickboxing'),
-    ('mobility', 'Mobility/Flexibility'),
-    ('pilates', 'Pilates'),
-    ('plyometrics', 'Plyometrics'),
-    ('powerlifting', 'Powerlifting'),
-    ('strength', 'Strength Training'),
-    ('tabata', 'Tabata Training'),
-    ('yoga', 'Yoga'),
-], key=lambda x: x[1])  # Sorts by display name
+
+GOAL_CHOICES = [
+    ('heart_health', 'Cardiovascular Health and Endurance - Improve your ability to exercise for longer periods without tiring.'),
+    ('energy', 'General Energy and Stamina - Increase your daily energy levels and feel less fatigue.'),
+    ('muscle_strength', 'Muscle Strength - Become stronger and lift or carry things more easily.'),
+    ('flexibility', 'Flexibility - Improve your ability to stretch and move your body.'),
+    ('explosive_power', 'Explosive Power - Perform quick and powerful movements like jumps or sprints.'),
+    ('speed', 'Speed - Run or move faster over short distances.'),
+    ('coordination', 'Coordination - Improve how your body moves smoothly and in sync.'),
+    ('agility', 'Agility - Move quickly and easily, especially when changing direction.'),
+    ('balance', 'Balance - Stay steady and stable during exercises or daily activities.'),
+    ('precision_control', 'Precision and Control - Perform exercises or movements with accuracy and focus.'),
+]
+
+
+DAYS_OF_WEEK_CHOICES = [
+    ('monday', 'Monday'),
+    ('tuesday', 'Tuesday'),
+    ('wednesday', 'Wednesday'),
+    ('thursday', 'Thursday'),
+    ('friday', 'Friday'),
+    ('saturday', 'Saturday'),
+    ('sunday', 'Sunday'),
+]

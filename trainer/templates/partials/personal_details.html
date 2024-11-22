@@ -2,16 +2,39 @@
 <p>First Name: {{ user_details.firstname }}</p>
 <p>Last Name: {{ user_details.lastname }}</p>
 <p>Date of Birth: {{ user_details.dob }}</p>
-<p>Current Injuries: {{ user_details.current_injuries }}</p>
-<p>Workout Preferences: {{ user_details.workout_preferences }}</p>
+<p>Age: {{ user_details.age }}</p>
+<p>Gender: {{ user_details.gender }}</p>
+<p>Height: {{ user_details.height }}</p>
+
+<p>BMI: 
+        {% if user_details.bmi %}
+                {{ user_details.bmi }}</p>
+        {% else %}
+                Add your weight to get your BMI calculation</p>
+        {% endif %}
+<p>Height: {{ user_details.height }}</p>
+<p>Fitness Level: {{ user_details.fitness_level }}</p>
+<p>Eating Habits: {{ user_details.eating_habits }}</p>
+<p>Workout Type Preference: {{ user_details.workout_type_preference }}</p>
+<p>Fitness Goals:</p>
+<ul>
+    {% for goal in user_details.fitness_goals %}
+        <li>{{ goal }}</li>
+    {% endfor %}
+</ul>
+<ul>
+    {% for day in user_details.workout_days %}
+        <li>{{ day }}</li>
+    {% endfor %}
+</ul>
+<p>Workout Days: {{ user_details.workout_days }}</p>
 <p>Preferred Location: {{ user_details.preferred_location }}</p>
-<p>Workouts Per Week: {{ user_details.workouts_per_week }}</p>
-<p>Preferred Workout Time: {{ user_details.preferred_workout_time }}</p>
-<p>Fitness Goals: {{ user_details.fitness_goals }}</p>
-<p>Specific Muscle Groups: {{ user_details.specific_muscle_groups }}</p>
-<p>Cardio Preferences: {{ user_details.cardio_preferences }}</p>
-<p>Recovery and Rest: {{ user_details.recovery_and_rest }}</p>
-<button hx-get="{% url 'update_personal_details' %}" 
-        hx-target="#personal-details-container" 
-        hx-swap="innerHTML" 
-        class="btn btn-warning mt-3">Update Personal Details</button>
+<p>Preferred Workout Duration: {{ user_details.preferred_workout_duration }}</p>
+
+<button 
+    hx-get="{% url 'update_personal_details' %}" 
+    hx-target="#personal-details-container" 
+    hx-swap="innerHTML" 
+    class="btn btn-warning mt-3">
+    Update Personal Details
+</button>

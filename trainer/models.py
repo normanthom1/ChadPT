@@ -1,25 +1,30 @@
 from django.db import models
+from multiselectfield import MultiSelectField
 from .lists_and_dictionaries import (
     EQUIPMENT_GROUP_CHOICES, 
     EQUIPMENT_CHOICES, 
-    FITNESS_GOAL_CHOICES, 
-    WORKOUT_PREFERENCE_CHOICES, 
-    WORKOUT_INTENSITY_CHOICES, 
+    GOAL_CHOICES, 
+    WORKOUT_TYPE_PREFERENCE_CHOICES,  
     FITNESS_LEVEL_CHOICES, 
-    MUSCLE_GROUP_CHOICES, 
-    CARDIO_PREFERENCE_CHOICES, 
-    RECOVERY_AND_REST_CHOICES, 
     WORKOUT_TIME_CHOICES,
-    QUOTES
+    GENDER_CHOICES,
+    WORKOUT_TYPE_PREFERENCE_CHOICES,
+    GOAL_CHOICES,
+    DAYS_OF_WEEK_CHOICES,
+    EATING_HABITS_CHOICES
 )
+
+from decimal import Decimal
+from datetime import date
 from django.conf import settings
 from .managers import CustomUserManager  # Import the custom manager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    # first_name = models.CharField(max_length=30)
+    # last_name = models.CharField(max_length=30)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
@@ -86,70 +91,100 @@ class UserPreference(models.Model):
     type, intensity, and fitness goals.
     """
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    firstname = models.CharField(max_length=50)
-    lastname = models.CharField(max_length=50)
+    firstname = models.CharField(max_length=30)
+    lastname = models.CharField(max_length=30)
+    gender = models.CharField(
+        max_length=20,
+        choices=GENDER_CHOICES,
+        help_text="Select your gender."
+    )
     dob = models.DateField()
-    workout_preferences = models.JSONField(blank=True, null=True)  # e.g., ["Crossfit", "Tabata", "Interval Training"]
-    # Adjusting the preferred_workout_time field to match workout_length in model
-    # User preference for workout time (length) in minutes
-    preferred_workout_time = models.CharField(
-        max_length=5,  # Maximum length for minute values like '10', '150'
-        choices=WORKOUT_TIME_CHOICES,
-        blank=True,
-        null=True,
+    height = models.IntegerField(
+        validators=[
+            MinValueValidator(50),
+            MaxValueValidator(300)
+        ],
+        help_text="Enter height in centimeters. Must be between 50 and 300.")
+    workout_type_preference = models.CharField(
+        max_length=20,
+        choices=WORKOUT_TYPE_PREFERENCE_CHOICES,
+        # default='functional',
+        help_text='Select your workout type preference.'
     )
-    fitness_goals = models.JSONField(blank=True, null=True)  # e.g., ["Increase strength", "Improve endurance"]
-    workouts_per_week = models.PositiveIntegerField(blank=True, null=True)
-    current_injuries = models.CharField(max_length=50, blank=True, null=True)
-    preferred_workout_intensity = models.CharField(
-        max_length=10,
-        choices=WORKOUT_INTENSITY_CHOICES,
-        default='Moderate',
-        blank=True,
+
+    fitness_goals = MultiSelectField(
+        choices=GOAL_CHOICES,
+        help_text='What would you like Chad to help you with?'
     )
+
     fitness_level = models.CharField(
         max_length=12,
         choices=FITNESS_LEVEL_CHOICES,
         default='Beginner',
         blank=True,
     )
+
+    eating_habits = models.CharField(
+        max_length=10,
+        choices=EATING_HABITS_CHOICES,
+        default='average',  # Default to 'Average'
+    )
+
+    workout_days = MultiSelectField(choices=DAYS_OF_WEEK_CHOICES, 
+                                    default=['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+                                    blank=True)
+
     preferred_location = models.ForeignKey(
         'Location',
         on_delete=models.SET_NULL,
         null=True,
-        related_name='users',
-        blank=True,
+        related_name='users'
     )
-    # specific_muscle_groups = models.CharField(
-    #     max_length=100,
-    #     choices=MUSCLE_GROUP_CHOICES,
-    #     blank=True,
-    #     null=True,
-    # )
-    # cardio_preferences = models.CharField(
-    #     max_length=50,
-    #     choices=CARDIO_PREFERENCE_CHOICES,
-    #     blank=True,
-    #     null=True,
-    # )
-    # recovery_and_rest = models.CharField(
-    #     max_length=20,
-    #     choices=RECOVERY_AND_REST_CHOICES,
-    #     blank=True,
-    #     null=True,
-    # )
-    specific_muscle_groups = models.JSONField(blank=True, null=True)  # Store a list of values
-    cardio_preferences = models.JSONField(blank=True, null=True)
-    recovery_and_rest = models.JSONField(blank=True, null=True)
+    
+    preferred_workout_duration = models.CharField(
+        max_length=5,  # Maximum length for minute values like '10', '150'
+        choices=WORKOUT_TIME_CHOICES,
+    )
+
+    @property
+    def age(self):
+        """
+        Calculate the user's age based on their date of birth (dob).
+        """
+        if self.dob:
+            today = date.today()
+            return today.year - self.dob.year - (
+                (today.month, today.day) < (self.dob.month, self.dob.day)
+            )
+        return None
+
+    @property
+    def bmi(self):
+        """
+        Calculate the user's BMI based on their most recent weight and height.
+        """
+        try:
+            # Get the most recent weight entry
+            latest_weight_entry = self.weight_history.first()
+            if not latest_weight_entry or not self.height:
+                return None
+            
+            weight = latest_weight_entry.weight  # in kg
+            height_in_meters = self.height / 100  # convert cm to meters
+
+            # Calculate BMI
+            return round(float(weight) / (height_in_meters ** 2), 2)
+        except Exception as e:
+            print(f"Error calculating BMI: {e}")
+            return None
 
     def __str__(self):
-        return f"{self.firstname} {self.lastname}"
-
+        return f"{self.user} Preferences"
+    
 class WeightHistory(models.Model):
     user = models.ForeignKey(UserPreference, on_delete=models.CASCADE, related_name='weight_history')
     date = models.DateField()
     weight = models.DecimalField(max_digits=5, decimal_places=2)  # in kg
-    bmi = models.DecimalField(max_digits=4, decimal_places=2)
 
     class Meta:
         ordering = ['-date']
