@@ -24,4 +24,6 @@ urlpatterns = [
     path('update-personal-details/', views.update_personal_details, name='update_personal_details'),
     path('create-workout-form/', views.create_workout_form_view, name='create_workout_form'),
     path('personal_details/', views.personal_details, name='personal_details'),
+    path('edit_field/<str:field_name>/', views.edit_field, name='edit_field'),
+    path('update_field/<str:field_name>/', views.update_field, name='update_field'),
 ]

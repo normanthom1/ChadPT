@@ -4,6 +4,8 @@
 {% block content %}
 
 {% comment %} Section 1 - Introduction {% endcomment %}
+
+
 <div class="d-flex flex-column align-items-center justify-content-center" 
     style="
         background-image:  url('{% static 'images/Fitness.jpg' %}'); 
@@ -14,13 +16,19 @@
         color: white;">
     <h1 style="font-family: 'Anton', sans-serif; font-size: 100px; color: white;">CHAD PT</h1>
     <h3 style="font-family: Arial, sans-serif; color: white;">Your AI Personal Trainer</h3>
-    <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Meet Chad</button>
+    {% if not user.is_authenticated %}
+        <button class="btn btn-warning mt-3" style="font-size: 20px;" onclick="scrollToNextDiv(this)">Meet Chad</button>
+    {% endif %}
 </div>
+
+
 {% comment %} Section 1 End {% endcomment %}
 
 {% comment %} ################################################################ {% endcomment %}
 
 {% comment %} Section 2 - Chad Introduction {% endcomment %}
+
+{% if not user.is_authenticated %}
 <div class="d-flex flex-column align-items-center justify-content-center" 
     style="background-color: black; 
            background-size: cover; 
@@ -52,18 +60,42 @@
                     motivated every step of the way. No more guesswork—let's make the most of your time and space. 
                     Ready to crush your fitness goals? Let’s get started!
                 </p>
-                <a class="btn btn-warning mt-3 mb-5" style="font-size: 20px;" href="{% url 'signup' %}">Sign Up</a>
+                <div class="container">
+                    <div class="row">
+                        {% comment %} <div class="col-5">
+                            <a class="btn btn-warning btn-block mt-3 mb-5" style="font-size: 20px;" href="{% url 'signin' %}">Sign In</a>
+                        </div> {% endcomment %}
+                        <div class="col-5">
+                            <a class="btn btn-warning btn-block mt-3 mb-5" style="font-size: 20px;" hx-get="{% url 'login' %}" hx-target="#signin-popup" hx-swap="outerHTML">
+                                Sign In
+                            </a>
+                            <div id="signin-popup"></div>
+                        </div>
+                        <div class="col-2">
+                            <p class='mt-4'><em><i>or</i></em></p>
+                        </div>
+                        <div class="col-5">
+                            <a class="btn btn-warning btn-block mt-3 mb-5" style="font-size: 20px;" href="{% url 'signup' %}">Sign Up</a>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
 </div>
+
+{% endif %}
 {% comment %} Section 2 - End {% endcomment %}
 
 {% comment %} ################################################################ {% endcomment %}
 
 {% comment %} Section 3 -  Next Workout (Login Required) {% endcomment %}
+
+{% if user.is_authenticated %}
+
 <div class="d-flex flex-column align-items-center justify-content-center"; id="next-workout"; 
-    style="background-image:  url('{% static 'images/Fitness.jpg' %}');
+    style="background-color:#212121;;
            background-size: cover; 
            background-position: center; 
            min-height: 100vh; 
@@ -135,16 +167,17 @@
 
 </div>
 </div>
+{% endif %}
 {% comment %} Section 3 - End {% endcomment %}
 
 {% comment %} ################################################################ {% endcomment %}
 
 {% comment %} Section 4 - Create Workout {% endcomment %}
+{% if user.is_authenticated %}
 <div class="d-flex flex-column align-items-center justify-content-center" 
     style="background-color: black; 
            background-size: cover; 
            background-position: center; 
-           {% comment %} min-height: 100vh;  {% endcomment %}
            text-align: center; 
            color: white;"
            >
@@ -159,13 +192,15 @@
     </div>  
 </div>
 
+{% endif %}
+
 {% comment %} Section 4 End {% endcomment %}
 
 {% comment %} ################################################################ {% endcomment %}
 
 {% comment %} Section 5 - Personal Details (Login Required) {% endcomment %}
 
-
+{% if user.is_authenticated %}
 <div class="d-flex flex-column align-items-center justify-content-center pt-5 pb-5" id="personal-details"
      style="background-image: url('{% static 'images/Fitness.jpg' %}'); 
             background-size: cover; 
@@ -181,6 +216,9 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
+
+
 
 {% comment %} Section 5 - End {% endcomment %}

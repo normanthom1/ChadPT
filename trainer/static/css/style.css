@@ -188,6 +188,17 @@ select.form-control option {
     color: white; /* Ensures text inside the box is white */
 }
 
+.signin-popup {
+    position: absolute;
+    top: 150px; /* Adjust the value to position the popup */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
 
 
   

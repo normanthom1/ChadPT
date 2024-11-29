@@ -185,6 +185,13 @@ EQUIPMENT_CHOICES = [
     ('Exercise Ball (Stability Ball)', 'Miscellaneous'),
 ]
 
+MUSCLE_GROUP_CHOICES = [
+    ('upper_body', 'Upper Body'),
+    ('lower_body', 'Lower Body'),
+    ('full_body', 'Full Body'),
+    ('core', 'Core'),
+    ('arms', 'Arms'),
+]
 
 
 EATING_HABITS_CHOICES = [

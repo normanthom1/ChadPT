@@ -15,7 +15,8 @@ from .lists_and_dictionaries import (
     GOAL_CHOICES,
     DAYS_OF_WEEK_CHOICES,
     EATING_HABITS_CHOICES,
-    PLAN_DURATION_CHOICES
+    PLAN_DURATION_CHOICES,
+    MUSCLE_GROUP_CHOICES
 )
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
@@ -168,7 +169,23 @@ class WorkoutPlanForm(forms.Form):
         return start_date
 
 
-
+class UserDetailsForm(forms.ModelForm):
+    class Meta:
+        model = UserPreference  # This should be the model you're using
+        fields = [
+                    'firstname', 
+                    'lastname', 
+                    'dob',  
+                    'gender', 
+                    'height', 
+                    'fitness_level', 
+                    'eating_habits', 
+                    'workout_type_preference', 
+                    'fitness_goals', 
+                    'workout_days', 
+                    'preferred_location', 
+                    'preferred_workout_duration'
+                  ]
 
 
 class UserUpdateForm(forms.ModelForm):

@@ -1,35 +1,122 @@
-<h2>Your Personal Details</h2>
-<p>First Name: {{ user_details.firstname }}</p>
-<p>Last Name: {{ user_details.lastname }}</p>
-<p>Date of Birth: {{ user_details.dob }}</p>
-<p>Age: {{ user_details.age }}</p>
-<p>Gender: {{ user_details.gender }}</p>
-<p>Height: {{ user_details.height }}</p>
+{% load static %}
+{% load widget_tweaks %}
 
-<p>BMI: 
-        {% if user_details.bmi %}
-                {{ user_details.bmi }}</p>
-        {% else %}
-                Add your weight to get your BMI calculation</p>
-        {% endif %}
-<p>Height: {{ user_details.height }}</p>
-<p>Fitness Level: {{ user_details.fitness_level }}</p>
-<p>Eating Habits: {{ user_details.eating_habits }}</p>
-<p>Workout Type Preference: {{ user_details.workout_type_preference }}</p>
-<p>Fitness Goals:</p>
-<ul>
-    {% for goal in user_details.fitness_goals %}
-        <li>{{ goal }}</li>
-    {% endfor %}
-</ul>
-<ul>
-    {% for day in user_details.workout_days %}
-        <li>{{ day }}</li>
-    {% endfor %}
-</ul>
-<p>Workout Days: {{ user_details.workout_days }}</p>
-<p>Preferred Location: {{ user_details.preferred_location }}</p>
-<p>Preferred Workout Duration: {{ user_details.preferred_workout_duration }}</p>
+<h2>Your Personal Details</h2>
+
+<!-- First Name -->
+<p id="firstname-display">
+    First Name: {{ user_details.firstname }} 
+    <button hx-get="{% url 'edit_field' 'firstname' %}" hx-target="#firstname-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Last Name -->
+<p id="lastname-display">
+    Last Name: {{ user_details.lastname }} 
+    <button hx-get="{% url 'edit_field' 'lastname' %}" hx-target="#lastname-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Date of Birth -->
+<p id="dob-display">
+    Date of Birth: {{ user_details.dob }}
+    <button hx-get="{% url 'edit_field' 'dob' %}" hx-target="#dob-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Age -->
+<p id="age-display">
+    Age: {{ user_details.age }} 
+</p>
+
+<!-- Gender -->
+<p id="gender-display">
+    Gender: {{ user_details.gender }} 
+    <button hx-get="{% url 'edit_field' 'gender' %}" hx-target="#gender-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Height -->
+<p id="height-display">
+    Height: {{ user_details.height }} 
+    <button hx-get="{% url 'edit_field' 'height' %}" hx-target="#height-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- BMI -->
+<p id="bmi-display">
+    BMI: {% if user_details.bmi %}
+        {{ user_details.bmi }}
+    {% else %}
+        Add your weight to get your BMI calculation
+    {% endif %}
+</p>
+
+<!-- Fitness Level -->
+<p id="fitness-level-display">
+    Fitness Level: {{ user_details.fitness_level }} 
+    <button hx-get="{% url 'edit_field' 'fitness_level' %}" hx-target="#fitness-level-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Eating Habits -->
+<p id="eating-habits-display">
+    Eating Habits: {{ user_details.eating_habits }} 
+    <button hx-get="{% url 'edit_field' 'eating_habits' %}" hx-target="#eating-habits-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Workout Type Preference -->
+<p id="workout-type-preference-display">
+    Workout Type Preference: {{ user_details.workout_type_preference }} 
+    <button hx-get="{% url 'edit_field' 'workout_type_preference' %}" hx-target="#workout-type-preference-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Fitness Goals -->
+<p id="fitness-goals-display">
+    Fitness Goals:
+    <ul>
+        {% for goal in user_details.fitness_goals %}
+            <li>{{ goal }}</li>
+        {% endfor %}
+    </ul>
+    <button hx-get="{% url 'edit_field' 'fitness_goals' %}" hx-target="#fitness-goals-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Workout Days -->
+<p id="workout-days-display">
+    Workout Days: {{ user_details.workout_days }} 
+    <button hx-get="{% url 'edit_field' 'workout_days' %}" hx-target="#workout-days-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Preferred Location -->
+<p id="preferred-location-display">
+    Preferred Location: {{ user_details.preferred_location }} 
+    <button hx-get="{% url 'edit_field' 'preferred_location' %}" hx-target="#preferred-location-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
+
+<!-- Preferred Workout Duration -->
+<p id="preferred-workout-duration-display">
+    Preferred Workout Duration: {{ user_details.preferred_workout_duration }} 
+    <button hx-get="{% url 'edit_field' 'preferred_workout_duration' %}" hx-target="#preferred-workout-duration-display" hx-swap="outerHTML">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+</p>
 
 <button 
     hx-get="{% url 'update_personal_details' %}" 

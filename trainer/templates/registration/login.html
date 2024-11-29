@@ -1,11 +1,31 @@
-<!-- templates/registration/login.html -->
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-  <h2>Login</h2>
-  <form method="post" action="{% url 'login' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
+    <div class="container">
+        <h2>Login</h2>
+
+        <div id="form-container">
+            <!-- Login form with HTMX POST action -->
+            <form method="post" action="{% url 'login' %}" hx-post="{% url 'login' %}" hx-target="#form-container">
+                {% csrf_token %}
+                
+                <!-- Render the login form fields -->
+                {{ form.as_p }}
+                
+                <button type="submit" class="btn btn-warning btn-sm btn-block">Login</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <!-- Add HTMX library -->
+    <script src="https://unpkg.com/htmx.org@1.7.0"></script>
+    <script>
+        // Ensure CSRF token is included in HTMX requests
+        document.addEventListener('htmx:configRequest', function(event){
+            var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            event.detail.headers['X-CSRFToken'] = csrfToken;
+        });
+    </script>
 {% endblock %}

@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.forms import modelformset_factory
 from decimal import Decimal
+from django.template.loader import render_to_string
 
 from .forms import WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm, ExerciseForm, UserDetailsForm, PreferencesForm
 from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location, Query, CustomUser, WorkoutSession, Exercise
@@ -48,13 +49,64 @@ if dotenv_path.exists():
     load_dotenv(dotenv_path)
 
 
+# class CustomLoginView(LoginView):
+#     """
+#     Custom login view that uses a custom authentication form
+#     and template for user login.
+#     """
+#     authentication_form = CustomAuthenticationForm
+#     template_name = 'registration/login.html'
+
+# class CustomLoginView(LoginView):
+#     authentication_form = CustomAuthenticationForm
+#     template_name = 'registration/login.html'
+
+#     def get(self, request, *args, **kwargs):
+#         if request.headers.get('HX-Request'):  # Check if the request is made by HTMX
+#             html = render_to_string('registration/login.html', {'form': self.get_form()}, request=request)
+#             return JsonResponse({'html': html})
+#         return super().get(request, *args, **kwargs)
+
+# class CustomLoginView(LoginView):
+#     authentication_form = CustomAuthenticationForm
+#     template_name = 'registration/login.html'
+
+#     def get(self, request, *args, **kwargs):
+#         if request.headers.get('HX-Request'):  # Check if the request is made by HTMX
+#             html = render_to_string('registration/login_form.html', {'form': self.get_form()}, request=request)
+#             return JsonResponse({'html': html})
+#         return super().get(request, *args, **kwargs)
+
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.views.generic import TemplateView
+from django.middleware.csrf import get_token
+
 class CustomLoginView(LoginView):
-    """
-    Custom login view that uses a custom authentication form
-    and template for user login.
-    """
     authentication_form = CustomAuthenticationForm
     template_name = 'registration/login.html'
+
+    def get(self, request, *args, **kwargs):
+        if request.headers.get('HX-Request'):  # Check if the request is made by HTMX
+            form = self.get_form()
+
+            # Get the CSRF token for the form
+            csrf_token = get_token(request)
+
+            # Render the form manually, including CSRF token
+            html = f"""
+            <div class="container mb-5">
+                <form method="post" action="{request.path}">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+                    {form.as_p()}
+                    <button type="submit" class="btn btn-block btn-warning btn-sm">Login</button>
+                </form>
+            </div>
+            """
+            return HttpResponse(html)  # Return HTML response directly
+
+        return super().get(request, *args, **kwargs)
+
 
 
 def homepage(request):
@@ -512,14 +564,32 @@ def update_personal_details(request):
         })
 
 
-
+###################################
 
 def personal_details(request):
     preferences, created = UserPreference.objects.get_or_create(user=request.user)
-    user_details = personal_details_dict(preferences)
+    user_details = preferences
     return render(request, 'partials/personal_details.html', {'user_details': user_details})
 
+def edit_field(request, field_name):
+    preferences = UserPreference.objects.get(user=request.user)
+    form = UserDetailsForm(initial={'firstname': preferences.firstname, 'lastname': preferences.lastname})
+    return render(request, 'partials/edit_field.html', {'form': form})
 
+    form = UserDetailsForm(instance=preferences)
+    return render(request, 'partials/edit_field.html', {'form': form})
+
+def update_field(request, field_name):
+    preferences, created = UserPreference.objects.get_or_create(user=request.user)
+    value = request.POST.get('value')
+
+    # Update the field dynamically
+    setattr(preferences, field_name, value)
+    preferences.save()
+
+    return JsonResponse({'status': 'success', 'new_value': value})
+
+#########################################
 
 def create_workout_form_view(request):
     if request.method == "POST":
