@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+<div id="user-details-container">
+    <h1>Update User Details</h1>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <!-- Include the management form to fix the error -->
+        {{ wizard.management_form }}
+        
+        {{ wizard.form.non_field_errors }}
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-12 col-md-6 pr-3">
+                {% for field in wizard.form %}
+
+                    {% comment %} {% else %} {% endcomment %}
+                        <div class="form-group mb-3">
+                            {{ field.label_tag }}
+                            {{ field.label_tag }}
+                            {% if field.field.widget.input_type == "checkbox" %}
+                                <div class="form-check">
+                                    <div class="checkbox-container faint-white-box" 
+                                         style="max-height: 300px; overflow-y: auto; text-align: left;">
+                                        {% for widget in field %}
+                                            <div class="form-check">
+                                                {{ widget.tag }} {{ widget.choice_label }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% elif field.field.widget.input_type == "select" %}
+                                {% if field.field.widget.attrs.multiple %}
+                                    <select class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" multiple size="10">
+                                        {% for option in field %}
+                                            <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
+                                                {{ option.label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                {% else %}
+                                    {{ field|add_class:"form-control" }}
+                                {% endif %}
+                            {% else %}
+                                {{ field|add_class:"form-control" }}
+                            {% endif %}
+                        </div>
+                {% endfor %}
+            </div>
+        </div>
+        <br>
+        <div class="container text-center">
+            <div class="progress mb-4">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  style="width: {{ wizard.steps.percent_complete }}%;"
+                  aria-valuenow="{{ wizard.steps.percent_complete }}"
+                  aria-valuemin="0"
+                  aria-valuemax="100">
+                  Step {{ wizard.steps.step1 }} of {{ wizard.steps.step_count }}
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                {% if wizard.steps.prev %}
+                    <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" class="btn btn-secondary">
+                        Back
+                    </button>
+                {% endif %}
+                <button type="submit" class="btn btn-warning mt-3 btn-block">Next</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

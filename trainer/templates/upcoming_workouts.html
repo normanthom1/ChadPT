@@ -3,6 +3,13 @@
 {% load widget_tweaks %}
 {% block content %}
 
+<div id="create-workout-container" class="mt-4">
+    <button class="btn btn-lrg btn-warning btn-block mt-3 mb-5" hx-get="{% url 'create_workout_form' %}" 
+            hx-target="#create-workout-container" 
+            hx-swap="innerHTML">
+        Create a Workout Plan
+    </button>
+</div> 
 
 <div class="d-flex flex-column align-items-center justify-content-center mt-5 pt-5" 
     style="background-color: black; 

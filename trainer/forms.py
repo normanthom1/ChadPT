@@ -1,5 +1,7 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
+from django.utils.timezone import now
 from .models import CustomUser, UserPreference, Location, WorkoutSession, Exercise, Equipment, WeightHistory
 from .lists_and_dictionaries import (
     EQUIPMENT_GROUP_CHOICES, 
@@ -33,16 +35,19 @@ class LocationForm(forms.ModelForm):
 
 from datetime import date
 
-class CustomUserCreationForm(UserCreationForm):
-    # User fields
+
+
+# Step 1: User details
+class UserDetailsForm(forms.Form):
     email = forms.EmailField(required=True)
     firstname = forms.CharField(max_length=50)
     lastname = forms.CharField(max_length=50)
     height = forms.IntegerField()
-    weight = forms.DecimalField(max_digits=5, decimal_places=2, help_text="Enter your weight in kilograms.")  # New field
+    weight = forms.DecimalField(max_digits=5, decimal_places=2, help_text="Enter your weight in kilograms.")
     dob = forms.DateField(widget=forms.SelectDateWidget(years=range(1940, 2025)))
 
-    # Preference fields
+# Step 2: Preferences
+class PreferencesForm(forms.Form):
     gender = forms.ChoiceField(
         choices=GENDER_CHOICES,
         help_text="Select your gender."
@@ -76,21 +81,20 @@ class CustomUserCreationForm(UserCreationForm):
         required=False,
         initial=['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
     )
-    # Add a field for existing locations
+
+# Step 3: Location
+class LocationForm(forms.Form):
+    preferred_location = forms.ChoiceField(
+        choices=[('existing', 'Choose Existing Location'), ('new', 'Create New Location')],
+        widget=forms.RadioSelect,
+        help_text="Select your preferred workout location or choose to create a new location."
+    )
     existing_location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'}),
         help_text="Select an existing location."
     )
-
-    # Preferred location as a choice between 'existing' and 'new'
-    preferred_location = forms.ChoiceField(
-        choices=[('existing', 'Choose Existing Location'), ('new', 'Create New Location')],
-        widget=forms.RadioSelect,
-        help_text="Select your preferred workout location or choose to create a new location."
-    )
-
     new_location_name = forms.CharField(
         max_length=100,
         required=False,
@@ -121,98 +125,49 @@ class CustomUserCreationForm(UserCreationForm):
         help_text="Select your preferred workout duration."
     )
 
-    class Meta:
-        model = CustomUser
-        fields = [
-            'email', 'password1', 'password2', 'firstname', 'lastname', 'dob',
-            'gender', 'height', 'weight', 'workout_type_preference', 'fitness_goals', 'fitness_level',
-            'eating_habits', 'workout_days', 'preferred_location', 'existing_location',
-            'new_location_name', 'new_location_address', 'new_location_type',
-            'new_location_equipment', 'preferred_workout_duration'
-        ]
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        if commit:
-            user.save()
-
-            # Create the UserPreference instance
-            preferences = UserPreference.objects.create(
-                user=user,
-                firstname=self.cleaned_data['firstname'],
-                lastname=self.cleaned_data['lastname'],
-                dob=self.cleaned_data['dob'],
-                gender=self.cleaned_data['gender'],
-                height=self.cleaned_data['height'],
-                workout_type_preference=self.cleaned_data['workout_type_preference'],
-                fitness_goals=self.cleaned_data['fitness_goals'],
-                fitness_level=self.cleaned_data['fitness_level'],
-                eating_habits=self.cleaned_data['eating_habits'],
-                workout_days=self.cleaned_data['workout_days'],
-                preferred_workout_duration=self.cleaned_data['preferred_workout_duration'],
-            )
-
-            preferred_location = self.cleaned_data.get('preferred_location')
-
-            if preferred_location == 'new':
-                # Create a new location
-                new_location = Location.objects.create(
-                    name=self.cleaned_data['new_location_name'],
-                    location_type=self.cleaned_data['new_location_type'],
-                    address=self.cleaned_data['new_location_address']
-                )
-                new_location.equipment.set(self.cleaned_data.get('new_location_equipment', []))
-                preferences.preferred_location = new_location
-            elif preferred_location == 'existing':
-                # Use an existing location
-                preferences.preferred_location = self.cleaned_data['existing_location']
-
-            preferences.save()
-
-            # Create the WeightHistory instance
-            WeightHistory.objects.create(
-                user=preferences,
-                date=date.today(),
-                weight=self.cleaned_data['weight']
-            )
-
-        return user
-
-
-
 
 class WorkoutPlanForm(forms.Form):
-    
     plan_duration = forms.ChoiceField(
-        choices=PLAN_DURATION_CHOICES, 
+        choices=PLAN_DURATION_CHOICES,
         label="Select Workout Plan Duration"
     )
 
     start_date = forms.DateField(
         widget=forms.SelectDateWidget(),
-        initial=timezone.now().date()
+        initial=now().date(),
     )
-    
+
     preferred_location = forms.ModelChoiceField(
-        queryset=Location.objects.all(), 
+        queryset=Location.objects.all(),
         label="Select Workout Location (Optional)",
         required=False,
-        empty_label="Select Workout Location"  # Blank option added here
+        empty_label="Select Workout Location",  # Blank option added here
     )
-    
+
     preferred_workout_type = forms.ChoiceField(
-        choices=WORKOUT_TYPE_PREFERENCE_CHOICES, 
+        choices=WORKOUT_TYPE_PREFERENCE_CHOICES,
         label="Preferred Workout Type (Optional)",
-        required=False
+        required=False,
     )
-    
+
     WORKOUT_LENGTH_CHOICES = [('', 'Select Workout Length')] + [(str(i), f"{i} minutes") for i in range(10, 151, 5)]
-    
+
     workout_length = forms.ChoiceField(
         choices=WORKOUT_LENGTH_CHOICES,
         label="Workout Length (Optional)",
-        required=False
+        required=False,
     )
+
+    def clean_start_date(self):
+        """
+        The workout can not be in the past
+        """
+        start_date = self.cleaned_data['start_date']
+        if start_date < now().date():
+            raise ValidationError("The workout can not be in the past")
+        return start_date
+
+
 
 
 
@@ -291,10 +246,7 @@ class UserUpdateForm(forms.ModelForm):
         return user_preference
 
     
-class WorkoutSessionForm(forms.ModelForm):
-    class Meta:
-        model = WorkoutSession
-        fields = ['difficulty_rating', 'enjoyment_rating', 'complete']
+
 
 class ExerciseForm(forms.ModelForm):
     class Meta:

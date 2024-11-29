@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">
+          <h4>Location Preferences</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {{ wizard.form.non_field_errors }}
+            
+            {% for field in wizard.form %}
+              <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                  {{ field.label }}
+                  {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                  <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+            
+            <div class="d-flex justify-content-between">
+              {% if wizard.steps.prev %}
+                <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" class="btn btn-secondary">
+                  Back
+                </button>
+              {% endif %}
+              <button type="submit" class="btn btn-primary">Next</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="progress mb-4">
+    <div 
+      class="progress-bar" 
+      role="progressbar" 
+      style="width: {{ wizard.steps.percent_complete }}%;" 
+      aria-valuenow="{{ wizard.steps.percent_complete }}" 
+      aria-valuemin="0" 
+      aria-valuemax="100">
+      Step {{ wizard.steps.step1 }} of {{ wizard.steps.step_count }}
+    </div>
+  </div>
+  
+{% endblock %}

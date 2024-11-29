@@ -1,0 +1,100 @@
+
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="pt-5">
+</div>
+
+<div id="user-details-container" class="pt-5 d-flex justify-content-center">
+    <div class="card shadow" style="background: rgba(255, 255, 255, 0.15);">
+        <div class="card-body">
+            <h1 class="text-center">Update User Details</h1>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {{ wizard.management_form }}
+                {{ wizard.form.non_field_errors }}
+
+                {% for field in wizard.form %}
+                    <div class="mb-4">
+                        <!-- Label above input -->
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                        </label>
+                        {% if field.field.widget.input_type == "checkbox" %}
+                            <div class="form-check">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input" 
+                                    id="{{ field.id_for_label }}" 
+                                    name="{{ field.name }}" 
+                                    {% if field.value %}checked{% endif %}
+                                >
+                                {{ field.choice_label }}
+                            </div>
+                        {% elif field.field.widget.input_type == "select" %}
+                            {% if field.field.widget.attrs.multiple %}
+                                <!-- Fix for multiple select -->
+                                <select 
+                                    class="form-control" 
+                                    id="{{ field.id_for_label }}" 
+                                    name="{{ field.name }}" 
+                                    multiple>
+                                    {% for option in field %}
+                                        <option 
+                                            value="{{ option.value }}" 
+                                            {% if option.selected %}selected{% endif %}>
+                                            {{ option.label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                {{ field|add_class:"form-control" }}
+                            {% endif %}
+                        {% else %}
+                            {{ field|add_class:"form-control" }}
+                        {% endif %}
+                        
+                        <!-- Help text and errors -->
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                
+                <div class="d-flex justify-content-between">
+                    {% if wizard.steps.prev %}
+                        <button 
+                            type="submit" 
+                            name="wizard_goto_step" 
+                            value="{{ wizard.steps.prev }}" 
+                            class="btn btn-secondary">
+                            Back
+                        </button>
+                    {% endif %}
+                    <button type="submit" class="btn btn-warning">Next</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Progress bar -->
+<div class="container text-center mt-4">
+    <div class="progress">
+        <div 
+            class="progress-bar bg-success" 
+            role="progressbar" 
+            style="width: {{ wizard.steps.percent_complete }}%;" 
+            aria-valuenow="{{ wizard.steps.percent_complete }}" 
+            aria-valuemin="0" 
+            aria-valuemax="100">
+            Step {{ wizard.steps.step2 }} of {{ wizard.steps.step_count }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

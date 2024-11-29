@@ -186,6 +186,21 @@ class WeightHistory(models.Model):
     date = models.DateField()
     weight = models.DecimalField(max_digits=5, decimal_places=2)  # in kg
 
+    @property
+    def bmi(self):
+        """
+        Calculate the BMI for this weight entry using the user's height.
+        """
+        if not self.user.height:
+            return None  # Height is required for BMI calculation
+        
+        try:
+            height_in_meters = self.user.height / 100  # Convert height from cm to meters
+            return round(float(self.weight) / (height_in_meters ** 2), 2)
+        except Exception as e:
+            print(f"Error calculating BMI for WeightHistory ID {self.id}: {e}")
+            return None
+
     class Meta:
         ordering = ['-date']
 
@@ -200,14 +215,14 @@ class WorkoutSession(models.Model):
     user = models.ForeignKey(UserPreference, on_delete=models.CASCADE, related_name='workouts')
     name = models.CharField(max_length=100, null=True)
     goal = models.CharField(max_length=400, null=True)
-    considerations = models.CharField(max_length=400, null=True)
+    # considerations = models.CharField(max_length=400, null=True)
     explanation = models.CharField(max_length=400, null=True)
     date = models.DateField()
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, related_name='workouts')
     description = models.TextField()  # e.g., "Complete each exercise in traditional sets"
-    time_taken = models.DurationField(null=True)  # stores time taken for the workout
-    difficulty_rating = models.PositiveIntegerField(null=True)
-    enjoyment_rating = models.PositiveIntegerField(null=True)
+    # time_taken = models.DurationField(null=True)  # stores time taken for the workout
+    # difficulty_rating = models.PositiveIntegerField(null=True)
+    # enjoyment_rating = models.PositiveIntegerField(null=True)
     workout_type = models.CharField(null=True, max_length=50)  # e.g., "Strength Training"
     muscle_groups = models.JSONField(null=True)  # e.g., ["Chest", "Back", "Legs"]
     complete = models.BooleanField(default=False)

@@ -13,12 +13,23 @@
         <div class="col-12 col-md-6">
             <form method="POST" enctype="multipart/form-data" id="create-workout-form" class="needs-validation" hx-post="{% url 'create_workout_form' %}" hx-target="#create-workout-container" hx-swap="outerHTML" novalidate>
                 {% csrf_token %}
+                
+                <!-- Loop through all form fields -->
                 {% for field in form %}
                     <div class="form-group mb-3">
                         {{ field.label_tag }}
                         {{ field|add_class:"form-control" }}
+                        
+                        <!-- Error handling for the field -->
+                        {% if field.errors %}
+                            <div class="text-danger">
+                                {{ field.errors|join:", " }}
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
+                
+                <!-- Submit Button -->
                 <button type="submit" class="btn btn-warning mt-3 mb-5 btn-block" style="font-size: 20px;">Submit</button>
             </form>
         </div>

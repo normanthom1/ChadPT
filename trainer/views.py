@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.forms import modelformset_factory
 from decimal import Decimal
 
-from .forms import CustomUserCreationForm, WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm, WorkoutSessionForm, ExerciseForm
+from .forms import WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm, ExerciseForm, UserDetailsForm, PreferencesForm
 from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location, Query, CustomUser, WorkoutSession, Exercise
 from .lists_and_dictionaries import (
     QUOTES,
@@ -118,27 +118,93 @@ def location_detail(request, location_id):
     return render(request, "partials/location_detail.html", context)
 
 
-def signup(request):
-    """
-    Handles user registration. On successful registration, logs the user in
-    and redirects to the workout generation page.
-    """
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('homepage')
-        else:
-            print(form.errors)
-    else:
-        form = CustomUserCreationForm()
+# def signup(request):
+#     """
+#     Handles user registration. On successful registration, logs the user in
+#     and redirects to the workout generation page.
+#     """
+#     if request.method == 'POST':
+#         form = CustomUserCreationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)
+#             return redirect('homepage')
+#         else:
+#             print(form.errors)
+#     else:
+#         form = CustomUserCreationForm()
 
-    return render(request, 'signup.html', {
-        'form': form,
-        'form_title': 'Sign Up',
-        'form_id': 'sign-up-form',
-    })
+#     return render(request, 'signup.html', {
+#         'form': form,
+#         'form_title': 'Sign Up',
+#         'form_id': 'sign-up-form',
+#     })
+
+from formtools.wizard.views import SessionWizardView
+from django.shortcuts import render
+from datetime import date
+
+FORMS = [("user_details", UserDetailsForm),
+         ("preferences", PreferencesForm),
+         ("location", LocationForm)]
+
+TEMPLATES = {
+    "user_details": "forms/user_details.html",
+    "preferences": "forms/preferences.html",
+    "location": "forms/location.html",
+}
+
+class CustomUserWizard(SessionWizardView):
+    form_list = FORMS
+
+    def get_template_names(self):
+        return [TEMPLATES[self.steps.current]]
+
+    def done(self, form_list, **kwargs):
+        data = {key: form.cleaned_data for key, form in zip(self.get_form_list(), form_list)}
+
+        # Create user and related models
+        user = CustomUser.objects.create_user(
+            email=data['user_details']['email'],
+            firstname=data['user_details']['firstname'],
+            lastname=data['user_details']['lastname'],
+            dob=data['user_details']['dob']
+        )
+
+        preferences = UserPreference.objects.create(
+            user=user,
+            gender=data['preferences']['gender'],
+            height=data['user_details']['height'],
+            workout_type_preference=data['preferences']['workout_type_preference'],
+            fitness_goals=data['preferences']['fitness_goals'],
+            fitness_level=data['preferences']['fitness_level'],
+            eating_habits=data['preferences']['eating_habits'],
+            workout_days=data['preferences']['workout_days'],
+            preferred_workout_duration=data['location']['preferred_workout_duration']
+        )
+
+        # Handle location
+        if data['location']['preferred_location'] == 'new':
+            new_location = Location.objects.create(
+                name=data['location']['new_location_name'],
+                location_type=data['location']['new_location_type'],
+                address=data['location']['new_location_address']
+            )
+            new_location.equipment.set(data['location']['new_location_equipment'])
+            preferences.preferred_location = new_location
+        else:
+            preferences.preferred_location = data['location']['existing_location']
+
+        preferences.save()
+
+        # Create initial weight history
+        WeightHistory.objects.create(
+            user=preferences,
+            date=date.today(),
+            weight=data['user_details']['weight']
+        )
+
+        return render(self.request, "forms/done.html", {"user": user})
 
 
 
@@ -380,35 +446,35 @@ def location_update(request, pk):
         'action': 'Update',
     })
 
-@login_required
-def update_workout_session(request, pk):
-    # Get the workout session or return a 404 error if not found
-    workout = get_object_or_404(WorkoutSession, id=pk)
+# @login_required
+# def update_workout_session(request, pk):
+#     # Get the workout session or return a 404 error if not found
+#     workout = get_object_or_404(WorkoutSession, id=pk)
 
-    # Initialize the WorkoutSessionForm with the current workout instance
-    workout_form = WorkoutSessionForm(request.POST or None, instance=workout)
+#     # Initialize the WorkoutSessionForm with the current workout instance
+#     # workout_form = WorkoutSessionForm(request.POST or None, instance=workout)
 
-    # Create a formset for updating the actual_weight of exercises
-    ExerciseFormSet = modelformset_factory(Exercise, form=ExerciseForm, extra=0)
-    exercise_formset = ExerciseFormSet(request.POST or None, queryset=workout.exercises.all())
+#     # Create a formset for updating the actual_weight of exercises
+#     ExerciseFormSet = modelformset_factory(Exercise, form=ExerciseForm, extra=0)
+#     exercise_formset = ExerciseFormSet(request.POST or None, queryset=workout.exercises.all())
 
-    # Handle form submission
-    if request.method == "POST":
-        if workout_form.is_valid() and exercise_formset.is_valid():
-            # Save workout session
-            workout_form.save()
+#     # Handle form submission
+#     if request.method == "POST":
+#         if workout_form.is_valid() and exercise_formset.is_valid():
+#             # Save workout session
+#             workout_form.save()
 
-            # Save each exercise's actual_weight
-            exercise_formset.save()
+#             # Save each exercise's actual_weight
+#             exercise_formset.save()
 
-            return redirect('workout_calendar')  # Redirect to the calendar or other desired view
+#             return redirect('workout_calendar')  # Redirect to the calendar or other desired view
 
-    context = {
-        'workout_form': workout_form,
-        'exercise_formset': exercise_formset,
-        'workout': workout,
-    }
-    return render(request, 'update_workout_session.html', context)
+#     context = {
+#         'workout_form': workout_form,
+#         'exercise_formset': exercise_formset,
+#         'workout': workout,
+#     }
+#     return render(request, 'update_workout_session.html', context)
 
 
 def update_personal_details(request):
@@ -463,11 +529,19 @@ def create_workout_form_view(request):
             preferences = get_object_or_404(UserPreference, user=user)
             weight_history = WeightHistory.objects.filter(user=preferences).order_by('-date')[:20]
             workout_sessions = WorkoutSession.objects.filter(user=preferences).order_by('-date')[:15]
+            if workout_sessions is None:
+                raise ValueError("workout_data is None")
+            else:
+                print(workout_sessions)
+
 
             # Get preferred workout type, location, and length from form or defaults
             preferred_workout_type = form.cleaned_data.get('preferred_workout_type') or ', '.join(preferences.workout_preferences)
-            preferred_location = form.cleaned_data.get('preferred_location') or preferences.preferred_location
-            workout_length = form.cleaned_data.get('workout_length') or preferences.preferred_workout_time
+            preferred_location = form.cleaned_data.get('preferred_location') or preferences.preferred_location.name
+            
+            location = Location.objects.get(name=preferred_location)
+            print(f'Preffered Location:{location}')
+            workout_length = form.cleaned_data.get('workout_length') or preferences.preferred_workout_duration
             start_date = form.cleaned_data.get('start_date')
             
             # Determine plan duration in days
@@ -481,7 +555,7 @@ def create_workout_form_view(request):
                 preferences,
                 preferred_workout_type,
                 workout_length,
-                preferred_location,
+                location,
                 weight_history,
                 workout_sessions,
             )
@@ -490,10 +564,12 @@ def create_workout_form_view(request):
             print(api_key)
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-1.5-flash")
+            print("#################payload_text###############")
+            print(payload_text)
             response = model.generate_content(payload_text)
             #print(response.text)
             workout_data = convert_text_to_json(response.text)
-            print(workout_data)
+            # print(workout_data)
             group_id = generate_random_id()
             # if workout_sessions:
             for workout in workout_data:

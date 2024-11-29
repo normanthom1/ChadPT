@@ -7,6 +7,9 @@ import google.generativeai as genai
 import requests
 import re
 import datetime
+from . models import Location
+import json
+from datetime import date
 
 from .lists_and_dictionaries import (
     EQUIPMENT_GROUP_CHOICES, 
@@ -21,6 +24,24 @@ from .lists_and_dictionaries import (
     DAYS_OF_WEEK_CHOICES,
     EATING_HABITS_CHOICES
 )
+
+def get_value_from_choices(key, choices):
+    """
+    Retrieve the value corresponding to a given key from a list of tuples.
+
+    Args:
+        key (str): The key to search for in the list of tuples.
+        choices (list): A list of tuples where each tuple contains a key-value pair.
+
+    Returns:
+        str: The value corresponding to the key if found, otherwise None.
+    """
+    for choice_key, choice_value in choices:
+        if choice_key == key:
+            return choice_value
+    return None
+
+
 
 def replace_text(text, new_date):
     # Replace the date in the format YYYY-MM-DD
@@ -49,44 +70,31 @@ def safe_join(field):
     return ', '.join(field) if isinstance(field, list) else field
 
     
-# def convert_text_to_json(text):
-#     """
-#     Converts a given text to a JSON object after removing backticks and unnecessary prefixes.
-#     """
-#     clean_text = text.strip('`').rstrip()
-    
-#     # Check for "json" prefix and remove it
-#     if clean_text.lower().startswith("json"):
-#         clean_text = clean_text[4:].strip()
-    
-#     # Clean up any remaining unnecessary parts (like extra backticks or unwanted characters)
-#     cleaned_text = clean_text.replace('{{', '{').replace('}}', '}')
-#     cleaned_text = cleaned_text.strip('`')  # Strip any remaining backticks at the ends
-    
-#     # Attempt to load the cleaned text as JSON
-#     try:
-#         parsed_json = json.loads(cleaned_text)
-#         print(parsed_json)  # Log the successfully parsed JSON
-#         return parsed_json
-#     except json.JSONDecodeError as e:
-#         print("Error decoding JSON:", e)
-#         print("Failed text:", cleaned_text)  # Log the problematic text
-#         return None
-    
-import json
-
-
-
 def convert_text_to_json(text):
+    """
+    Converts a JSON-like text input to a Python object.
+
+    Args:
+        text (str): A string containing JSON-formatted data, possibly wrapped in backticks.
+
+    Returns:
+        dict or list: A Python object (e.g., list or dictionary) parsed from the JSON text.
+
+    Raises:
+        ValueError: If the input text is not valid JSON or is empty.
+    """
+    # Check if the text is empty or None
+    if not text or not text.strip():
+        raise ValueError("Input text is empty or invalid.")
+    
     try:
-        # Replace potential problematic characters (e.g., unquoted values like 5-8 repetitions)
-        sanitized_text = text.replace("5-8 repetitions", "\"5-8 repetitions\"")
+        # Remove backticks and the "json" marker if present
+        sanitized_text = text.strip().lstrip("```json").rstrip("```").strip()
+        # Parse the sanitized JSON
         return json.loads(sanitized_text)
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
-        return None
-    
-from datetime import date
+        raise ValueError(f"Invalid JSON format: {e}\nInput text: {sanitized_text[:500]}...")
+
     
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -95,99 +103,6 @@ class CustomJSONEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
-def workout_payload_text(
-    plan_duration_value,
-    start_date,
-    preferences,
-    preferred_workout_type,
-    workout_length,
-    preferred_location,
-    weight_history,
-    workout_sessions,
-    ):
-    """
-    Generates a personalized workout plan payload as a formatted text.
-
-    Args:
-        plan_duration_value (str): Duration of the workout plan.
-        start_date (str): Starting date for the workout plan.
-        preferences (object): User preferences including fitness goals, intensity, etc.
-        preferred_workout_type (str): Preferred type of workout.
-        workout_length (int): Maximum workout duration in minutes.
-        preferred_location (object): Location and available equipment details.
-        weight_history (list): List of weight history entries.
-        workout_sessions (list): List of past workout sessions.
-
-    Returns:
-        str: A formatted workout plan payload text.
-    """
-    import json
-
-    payload_text = {
-        "plan_duration": plan_duration_value,
-        "start_date": start_date.isoformat() if isinstance(start_date, (str, object)) else start_date,
-        "preferences": {
-            "fitness_goals": preferences.fitness_goals if preferences.fitness_goals else [],
-            "workout_type": preferred_workout_type,
-            "workout_length": workout_length,
-            "workout_intensity": preferences.preferred_workout_intensity if preferences.preferred_workout_intensity else None,
-            "fitness_level": preferences.fitness_level if preferences.fitness_level else None,
-            "workouts_per_week": preferences.workouts_per_week,
-            "current_injuries": preferences.current_injuries if preferences.current_injuries else None,
-            "muscle_focus": preferences.specific_muscle_groups if preferences.specific_muscle_groups else [],
-            "cardio_preferences": preferences.cardio_preferences if preferences.cardio_preferences else [],
-        },
-        "location": {
-            "name": preferred_location,
-            "equipment": [equipment.equipment for equipment in preferred_location.equipment.all()],
-        },
-        "weight_history": [
-            {"date": entry.date, "weight": entry.weight, "bmi": entry.bmi} for entry in weight_history
-        ],
-        "past_workouts": [
-            {
-                "date": session.date,
-                "type": session.workout_type,
-                "duration": session.time_taken,
-                "difficulty": session.difficulty_rating,
-                "exercises": [
-                    {
-                        "name": exercise.name,
-                        "sets": exercise.sets,
-                        "reps": exercise.reps,
-                        "actual_weight": exercise.actual_weight or "Bodyweight",
-                    }
-                    for exercise in session.exercises.all()
-                ],
-            }
-            for session in workout_sessions
-        ],
-        "structured_workout_plan": [
-            {
-                "name": "Workout Name",
-                "goal": "Goal of the workout",
-                "muscle_group": "Muscle group worked",
-                "location": "Location of workout",
-                "date": start_date,
-                "exercises": [
-                    {
-                        "name": "Exercise Name",
-                        "sets": 3,
-                        "reps": "10 per leg",
-                        "recommended_weight": "10 kg",
-                        "description": "Exercise description",
-                    }
-                ],
-                "warm_up": "Warm-up details",
-                "cool_down": "Cool-down details",
-                "important_considerations": "Important considerations",
-                "explanation": "Detailed explanation of the workout",
-            }
-        ],
-    }
-
-    # Convert to formatted JSON string
-    return json.dumps(payload_text, indent=2, cls=CustomJSONEncoder)
 
 
 def personal_details_dict(preferences):
@@ -240,93 +155,101 @@ def personal_details_dict(preferences):
         return user_details
 
 
-# def workout_payload_text(
-#     plan_duration_value,
-#     start_date,
-#     preferences,
-#     preferred_workout_type,
-#     workout_length,
-#     preferred_location,
-#     weight_history,
-#     workout_sessions,
-#     ):
-#     """
-#     Generates a personalized workout plan payload as a formatted text.
+def workout_payload_text(
+    plan_duration_value,
+    start_date,
+    preferences,
+    preferred_workout_type,
+    workout_length,
+    location,
+    weight_history,
+    workout_sessions,
+    ):
+    """
+    Generates a personalized workout plan payload as a formatted text.
 
-#     Args:
-#         plan_duration_value (str): Duration of the workout plan.
-#         start_date (str): Starting date for the workout plan.
-#         preferences (object): User preferences including fitness goals, intensity, etc.
-#         preferred_workout_type (str): Preferred type of workout.
-#         workout_length (int): Maximum workout duration in minutes.
-#         preferred_location (object): Location and available equipment details.
-#         weight_history (list): List of weight history entries.
-#         workout_sessions (list): List of past workout sessions.
-#         safe_join (callable): A utility function to safely join list items.
+    Args:
+        plan_duration_value (str): Duration of the workout plan.
+        start_date (str): Starting date for the workout plan.
+        preferences (object): User preferences including fitness goals, intensity, etc.
+        preferred_workout_type (str): Preferred type of workout.
+        workout_length (int): Maximum workout duration in minutes.
+        preferred_location (object): Location and available equipment details.
+        weight_history (list): List of weight history entries.
+        workout_sessions (list): List of past workout sessions.
+        safe_join (callable): A utility function to safely join list items.
 
-#     Returns:
-#         str: A formatted workout plan payload text.
-#     """
-#     payload_text = (
-#         f"Imagine you are a personal trainer. Create a unique and challenging workout plan for one {plan_duration_value} "
-#         f"tailored to the individual's current fitness goals and workout frequency. Avoid repetition of past exercises while "
-#         f"ensuring a focus on under-targeted muscle groups based on workout history and user preference. The workout should "
-#         f"start on {start_date}\n\n"
-#         f"--- Personal Info ---\n"
-#         + (f"Fitness Goals: {', '.join(preferences.fitness_goals)}\n" if preferences.fitness_goals else "")
-#         + f"Preferred Workout Type: {preferred_workout_type}\n"
-#         + f"Workout should not take longer than: {workout_length} minutes\n"
-#         + (f"Preferred Workout Intensity: {preferences.preferred_workout_intensity}\n" if preferences.preferred_workout_intensity else "")
-#         + (f"Fitness Level: {preferences.fitness_level}\n" if preferences.fitness_level else "")
-#         + f"Workouts Per Week: {preferences.workouts_per_week}\n"
-#         + (f"Current injuries to consider: {preferences.current_injuries}\n" if preferences.current_injuries else "")
-#         + (f"Specific Muscle Groups to Focus on: {safe_join(preferences.specific_muscle_groups)}\n" if preferences.specific_muscle_groups else "")
-#         + (f"Cardio Preferences: {safe_join(preferences.cardio_preferences)}\n" if preferences.cardio_preferences else "")
-#         + (f"Recovery and Rest: {safe_join(preferences.recovery_and_rest)}\n" if preferences.recovery_and_rest and plan_duration_value == 'One Week' else "")
-#         + f"\n--- Workout Location & Available Equipment ---\n"
-#         + f"Location: {preferred_location.name}\n"
-#         + "Available Equipment for the Workout:\n"
-#         + "\n".join([f"  - {equipment.equipment}" for equipment in preferred_location.equipment.all()])
-#         + f"\n\n--- Weight History ---\n"
-#         + "\n".join([f"  - Date: {entry.date}, Weight: {entry.weight} kg, BMI: {entry.bmi}" for entry in weight_history])
-#         + "\n\n--- Past Workouts ---\n"
-#         + "\n".join(
-#             [
-#                 f"  - Date: {session.date}\n    Type: {session.workout_type}\n    Duration: {session.time_taken} mins\n    Difficulty: {session.difficulty_rating}\n"
-#                 "    Exercises:\n"
-#                 + "\n".join(
-#                     [
-#                         f"      - {exercise.name}: Sets {exercise.sets}, Reps {exercise.reps}, Weight: {exercise.actual_weight or 'Bodyweight'}"
-#                         for exercise in session.exercises.all()
-#                     ]
-#                 )
-#                 for session in workout_sessions
-#             ]
-#         )
-#         + f"\n\n--- Structured Workout Plan ---\n"
-#         f"Format the entire response as valid JSON as follows:\n"
-#         "[{{\n"
-#         "  \"name\": \"Workout Name\",\n"
-#         "  \"goal\": \"Goal of the workout\",\n"
-#         "  \"muscle group\": \"Muscle group worked\",\n"
-#         "  \"location\": \"Location of workout\",\n"
-#         "  \"date\": \"28-10-2024\",\n"
-#         "  \"exercises\": [\n"
-#         "    {{\n"
-#         "      \"name\": \"Exercise Name\",\n"
-#         "      \"sets\": \"3\",\n"
-#         "      \"reps\": \"10 per leg\",\n"
-#         "      \"recommended_weight\": \"10 kg\",\n"
-#         "      \"description\": \"Exercise description\"\n"
-#         "    }}\n"
-#         "  ],\n"
-#         "  \"warm_up\": \"Warm-up details\",\n"
-#         "  \"cool_down\": \"Cool-down details\",\n"
-#         "  \"important_considerations\": \"Important considerations\",\n"
-#         "  \"explanation\": \"Detailed explanation of the workout\"\n"
-#         "}}]\n"
-#     )
-#     return payload_text
+    Returns:
+        str: A formatted workout plan payload text.
+    """
+    location = Location.objects.get(name=location)
+
+
+    days = ', '.join([i.title() for i in preferences.workout_days])
+    # print([get_value_from_choices(i, FITNESS_LEVEL_CHOICES) for i in preferences.fitness_goals])
+    fitness_goals_desc = '\n - '.join([get_value_from_choices(i, GOAL_CHOICES) for i in preferences.fitness_goals])
+    preferred_workout_type_desc = get_value_from_choices(preferred_workout_type, WORKOUT_TYPE_PREFERENCE_CHOICES)
+    fitness_level_desc = get_value_from_choices(preferences.fitness_level, FITNESS_LEVEL_CHOICES)
+
+    payload_text = (
+        f"Imagine you are a personal trainer. Create a unique and challenging workout plan for one {plan_duration_value} "
+        f"tailored to the individual's current fitness goals and workout frequency. The workout should "
+        f"start on {start_date}. Take into account the users Personal Info, Workout Location & Available Equipment," 
+        f"Fitness, Level Age and BMI and Past Workouts below.\n\n"
+        f"--- Personal Info ---\n"
+        + f"Fitness Goals:\n{fitness_goals_desc}\n"
+        + f"Preferred Workout Type: {preferred_workout_type_desc}\n"
+        + f"Workout should not take longer than: {workout_length} minutes\n"
+        + f"Workouts should take place on these days: {days}, and there should be no more than {len(preferences.workout_days)} workouts per week"    
+        + f"\n\n--- Workout Location & Available Equipment ---\n"
+        + f"Location: {location.name}\n"
+        + "Available Equipment for the Workout:\n"
+        + "\n".join([f"  - {equipment.equipment}" for equipment in location.equipment.all()])
+        + f"\n\n--- Fitness Level Age and BMI ---\n"
+        + f"{fitness_level_desc}\n"
+        + f"Age: {preferences.age}\n"
+        + f"--- Weight History ---\n"
+        + "\n".join([f"  - Date: {entry.date}, Weight: {entry.weight} kg, BMI: {entry.bmi}" for entry in weight_history])
+        + "\n\n--- Past Workouts ---\n"
+        + f"Make sure that the new workout plan takes into account past workouts below "
+        + f"so that muscel groups are not overused and workouts are challenging and varied.\n"
+        + "\n".join(
+            [
+                f"  - Date: {session.date}\n    Type: {session.workout_type}\n"
+                "    Exercises:\n"
+                + "\n".join(
+                    [
+                        f"      - {exercise.name}: Sets {exercise.sets}, Reps {exercise.reps}, Weight: {exercise.actual_weight or 'Bodyweight'}"
+                        for exercise in session.exercises.all()
+                    ]
+                )
+                for session in workout_sessions
+            ]
+        )
+        + f"\n\n--- Structured Workout Plan ---\n"
+        f"Format the entire response as valid JSON as follows:\n"
+        "[{{\n"
+        "  \"name\": \"Workout Name\",\n"
+        "  \"goal\": \"Goal of the workout\",\n"
+        "  \"muscle group\": \"Muscle group worked\",\n"
+        "  \"location\": \"Location of workout\",\n"
+        "  \"date\": \"28-10-2024\",\n"
+        "  \"exercises\": [\n"
+        "    {{\n"
+        "      \"name\": \"Exercise Name\",\n"
+        "      \"sets\": \"3\",\n"
+        "      \"reps\": \"10 per leg\",\n"
+        "      \"recommended_weight\": \"10 kg\",\n"
+        "      \"description\": \"Exercise description\"\n"
+        "    }}\n"
+        "  ],\n"
+        "  \"warm_up\": \"Warm-up details\",\n"
+        "  \"cool_down\": \"Cool-down details\",\n"
+        "  \"important_considerations\": \"Important considerations\",\n"
+        "  \"explanation\": \"Detailed explanation of the workout\"\n"
+        "}}]\n"
+    )
+    return payload_text
 
 def generate_exercise_query(exercise_data):
     # Generate a query string to send to the model based on the exercise data
