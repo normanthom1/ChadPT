@@ -1,5 +1,23 @@
-<!-- edit_field_form.html -->
-<form hx-post="{% url 'update_field' field_name %}" hx-target="#{{ field_name }}-display" hx-swap="outerHTML">
-    <input type="text" name="value" value="{{ current_value }}" class="form-control" required>
+{% load static %}
+
+<form method="post" hx-post="{% url 'update_field' field_name %}" hx-target="#{{ field_name }}-display" hx-swap="outerHTML">
+    {% csrf_token %}
+    <div class="form-group">
+        {% for field in form %}
+            {% if field.name == field_name %}
+                <label for="{{ field.id_for_label }}">{{ field_name|title }}</label>  <!-- Use field's id for label's 'for' -->
+                {{ field }} <!-- Render only the specific field -->
+            {% endif %}
+        {% endfor %}
+    </div>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
+
+<!-- Optional: Display form errors -->
+{% if errors %}
+    <ul class="alert alert-danger">
+        {% for error in errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

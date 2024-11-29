@@ -571,23 +571,82 @@ def personal_details(request):
     user_details = preferences
     return render(request, 'partials/personal_details.html', {'user_details': user_details})
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+from django.shortcuts import render, redirect
+from .forms import UserDetailsForm
+from .models import UserPreference
+
 def edit_field(request, field_name):
     preferences = UserPreference.objects.get(user=request.user)
-    form = UserDetailsForm(initial={'firstname': preferences.firstname, 'lastname': preferences.lastname})
-    return render(request, 'partials/edit_field.html', {'form': form})
+    
+    # Create a form instance with the user data
+    form = UserDetailsForm(request.POST or None, instance=preferences)
+    
+    if request.method == 'POST':
+        # Ensure the field exists in the form and update it
+        if field_name in form.fields:
+            form.fields[field_name].initial = request.POST.get(field_name)
+        
+        # Disable all other fields except the one being edited
+        for field in form.fields:
+            if field != field_name:
+                form.fields[field].disabled = True
+        
+        # Validate and save the form
+        if form.is_valid():
+            form.save()
+            # Optionally, return a success response (or redirect)
+            return render(request, 'partials/edit_field.html', {'form': form, 'field_name': field_name})
+        else:
+            # Handle form errors (if any)
+            return render(request, 'partials/edit_field.html', {'form': form, 'field_name': field_name, 'errors': form.errors})
 
-    form = UserDetailsForm(instance=preferences)
-    return render(request, 'partials/edit_field.html', {'form': form})
+    # GET request: just display the form for the specific field
+    return render(request, 'partials/edit_field.html', {'form': form, 'field_name': field_name})
+
+
+
+
+
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+
+from django.shortcuts import render, redirect
+from .models import UserPreference
+from .forms import UserDetailsForm  # Make sure you import the appropriate form
 
 def update_field(request, field_name):
-    preferences, created = UserPreference.objects.get_or_create(user=request.user)
-    value = request.POST.get('value')
+    # Fetch the PersonalDetails instance
+    personal_details = UserPreference.objects.get(user=request.user)
+    # Adjust according to your logic
+    print(personal_details.name)
 
-    # Update the field dynamically
-    setattr(preferences, field_name, value)
-    preferences.save()
+    # Dynamically fetch the field name to update
+    if request.method == 'POST':
+        # Ensure you're using a form that dynamically updates based on the field_name
+        form = UserDetailsForm(request.POST, instance=personal_details)
+        
+        if form.is_valid():
+            # Update the specific field
+            setattr(personal_details, field_name, form.cleaned_data[field_name])
+            personal_details.save()
 
-    return JsonResponse({'status': 'success', 'new_value': value})
+            # If the field was updated successfully, redirect or update view as needed
+            return render(request, 'partials/update_field.html', {'form': form, 'field_name': field_name})
+
+    else:
+        # Instantiate the form with the current instance for GET requests
+        form = UserDetailsForm(instance=personal_details)
+
+    # Render the template with the form
+    return render(request, 'partials/update_field.html', {'form': form, 'field_name': field_name})
+
+
+
 
 #########################################
 
