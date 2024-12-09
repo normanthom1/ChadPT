@@ -1,0 +1,42 @@
+<div class="yellow-outline-box container mt-4" id="workout-{{ workout.id }}">
+    <h4> {{ workout.date|date:"l" }} </h4>
+    <h3 class="pb-3">{{ workout.name }}</h3>
+    <button class="btn btn-warning bt-sm mt-3 btn-block" style="font-size: 20px;"
+    hx-post="{% url 'replace_workout' group_id=workout.group_id workout_id=workout.id %}" 
+    hx-target="#workout-{{ workout.id }}" 
+    hx-swap="outerHTML">
+        Change Workout
+</button>
+    <p class='mt-4'><strong>Goal:</strong> {{ workout.goal }}</p>
+    <hr>
+    <p><strong>Date:</strong> {{ workout.date }}</p>
+    <hr>
+    <p><strong>Description:</strong> {{ workout.description }}</p>
+    <hr>
+    <p><strong>Warm-Up:</strong> {{ workout.warm_up }}</p>
+    
+    <div class='faint-white-box mt-5'>
+        <div class="text-center mb-4">
+            <h2>Workout</h2>
+          </div>
+    {% for exercise in exercises %}
+        <div id="exercise-{{ exercise.id }}">
+            <p><strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}<p>
+            {% if exercise.recommended_weight %}
+                <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
+            {% endif %}
+            <em class="pb-3">{{ exercise.description }}</em>
+            <br><br>
+            <button 
+                class="btn btn-warning btn-sm"
+                hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
+                hx-target="#exercise-{{ exercise.id }}" 
+                hx-swap="outerHTML">
+                Change Exercise
+            </button>
+        </div>
+        <hr>
+    {% endfor %}
+    </div>
+    <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
+</div>

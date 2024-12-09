@@ -17,7 +17,9 @@ urlpatterns = [
     # path('upcoming-workouts/<str:group_id>/', views.upcoming_workouts_view, name='upcoming_workouts'),
     path('workouts/<int:group_id>/', views.upcoming_workouts_view, name='upcoming_workouts'),
     path('workouts/<int:workout_id>/', views.workout_detail_view, name='workout_detail'),
-    path('workouts/replace/<int:workout_id>/', views.replace_workout, name='replace_workout'),
+    # path('workouts/replace/<int:workout_id>/', views.replace_workout, name='replace_workout'),
+    path('workouts/replace/<int:group_id>/<int:workout_id>/', views.replace_workout, name='replace_workout'),
+
     path('workouts/<int:workout_id>/exercise/replace/<int:exercise_id>/', views.replace_exercise, name='replace_exercise'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     # path('workout/<int:pk>/update/', views.update_workout_session, name='update_workout_session'),

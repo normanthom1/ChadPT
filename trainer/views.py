@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.forms import modelformset_factory
 from decimal import Decimal
 from django.template.loader import render_to_string
+from django.http import Http404
 
 from .forms import WorkoutPlanForm, UserUpdateForm, LocationForm, CustomAuthenticationForm, ExerciseForm, UserDetailsForm, PreferencesForm
 from .models import UserPreference, WeightHistory, WorkoutSession, WarmUp, CoolDown, Exercise, Location, Query, CustomUser, WorkoutSession, Exercise
@@ -48,34 +49,6 @@ dotenv_path = BASE_DIR / '.env'
 if dotenv_path.exists():
     load_dotenv(dotenv_path)
 
-
-# class CustomLoginView(LoginView):
-#     """
-#     Custom login view that uses a custom authentication form
-#     and template for user login.
-#     """
-#     authentication_form = CustomAuthenticationForm
-#     template_name = 'registration/login.html'
-
-# class CustomLoginView(LoginView):
-#     authentication_form = CustomAuthenticationForm
-#     template_name = 'registration/login.html'
-
-#     def get(self, request, *args, **kwargs):
-#         if request.headers.get('HX-Request'):  # Check if the request is made by HTMX
-#             html = render_to_string('registration/login.html', {'form': self.get_form()}, request=request)
-#             return JsonResponse({'html': html})
-#         return super().get(request, *args, **kwargs)
-
-# class CustomLoginView(LoginView):
-#     authentication_form = CustomAuthenticationForm
-#     template_name = 'registration/login.html'
-
-#     def get(self, request, *args, **kwargs):
-#         if request.headers.get('HX-Request'):  # Check if the request is made by HTMX
-#             html = render_to_string('registration/login_form.html', {'form': self.get_form()}, request=request)
-#             return JsonResponse({'html': html})
-#         return super().get(request, *args, **kwargs)
 
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -170,27 +143,6 @@ def location_detail(request, location_id):
     return render(request, "partials/location_detail.html", context)
 
 
-# def signup(request):
-#     """
-#     Handles user registration. On successful registration, logs the user in
-#     and redirects to the workout generation page.
-#     """
-#     if request.method == 'POST':
-#         form = CustomUserCreationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             login(request, user)
-#             return redirect('homepage')
-#         else:
-#             print(form.errors)
-#     else:
-#         form = CustomUserCreationForm()
-
-#     return render(request, 'signup.html', {
-#         'form': form,
-#         'form_title': 'Sign Up',
-#         'form_id': 'sign-up-form',
-#     })
 
 from formtools.wizard.views import SessionWizardView
 from django.shortcuts import render
@@ -330,6 +282,7 @@ def upcoming_workouts_view(request, group_id):
             'name': workout.name,
             'goal': workout.goal,
             'date': workout.date,
+            'group_id': workout.group_id,
             'description': workout.description,
             'warm_up': warm_up.description if warm_up else "No warm-up",
             'cool_down': cool_down.description if cool_down else "No cool-down",
@@ -348,53 +301,85 @@ def upcoming_workouts_view(request, group_id):
     return render(request, 'upcoming_workouts.html', {'workouts_data': workouts_data, 'group_id': group_id})
 
 @csrf_exempt
-def replace_workout(request, workout_id):
+def replace_workout(request, group_id, workout_id):
+    try:
+        workout = WorkoutSession.objects.get(pk=workout_id)
+        print(f"WORKOUT - ID:{workout.id}")
+    except WorkoutSession.DoesNotExist:
+        raise Http404("Workout does not exist")
+    print('replacing workouts')
     if request.method == "POST":
-        user = request.user
-        preferences = get_object_or_404(UserPreference, user=user)
-        # Delete the specified workout and its related data
-        workout = get_object_or_404(WorkoutSession, id=workout_id)
-        workout_date = workout.date
-        group_id = workout.group_id
-        workout.delete()  # This cascades to delete WarmUp, CoolDown, and Exercises
-        
-        # Retrieve the original query
-        original_query = get_object_or_404(Query, group_id=group_id).query
+        try:
+            user = request.user
+            print(f"User: {user}")
+            preferences = get_object_or_404(UserPreference, user=user)
+            print(f"User Preferences found: {preferences}")
+            user = request.user
+            # Delete the specified workout and its related data
+            workout = get_object_or_404(WorkoutSession, id=workout_id)
+            workout_date = workout.date
+            group_id = workout.group_id
+            print(group_id)
+            workout.delete()  # This cascades to delete WarmUp, CoolDown, and Exercises
+            print('workout deleted')
+            
+            # Retrieve the original query
+            original_query = get_object_or_404(Query, group_id=group_id).query
 
-        # Call Gemini API to get a new workout
-        api_key = os.getenv('GEMINI_API')
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(replace_text(original_query, workout_date)) 
-        # Parse the response and save new workout data
-        workout_data = convert_text_to_json(response.text)
-        # print(response.text)  # You would need a JSON parsing function here
-        for workout in workout_data:
-            workout_session = WorkoutSession.objects.create(
-                group_id=group_id,
-                user=preferences,
-                location=preferences.preferred_location,
-                name=workout.get('name'),
-                goal=workout.get('goal'),
-                date=workout.get('date'),
-                description=workout.get('explanation'),
-                workout_type=workout.get('workout_type'),
-            )
-
-            WarmUp.objects.create(workout=workout_session, description=workout.get('warm_up'))
-            CoolDown.objects.create(workout=workout_session, description=workout.get('cool_down'))
-
-            for exercise in workout.get('exercises', []):
-                Exercise.objects.create(
-                    workout=workout_session,
-                    name=exercise.get('name'),
-                    sets=exercise.get('sets'),
-                    reps=exercise.get('reps'),
-                    description=exercise.get('description')
+            print(original_query)
+            # Call Gemini API to get a new workout
+            api_key = os.getenv('GEMINI_API')
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(replace_text(original_query, workout_date)) 
+            print(response.text)
+            # Parse the response and save new workout data
+            workout_data = convert_text_to_json(response.text)
+            # print(response.text)  # You would need a JSON parsing function here
+            for workout in workout_data:
+                workout_session = WorkoutSession.objects.create(
+                    group_id=group_id,
+                    user=preferences,
+                    location=preferences.preferred_location,
+                    name=workout.get('name'),
+                    goal=workout.get('goal'),
+                    date=workout.get('date'),
+                    description=workout.get('explanation'),
+                    workout_type=workout.get('workout_type'),
                 )
 
+                WarmUp.objects.create(workout=workout_session, description=workout.get('warm_up'))
+                CoolDown.objects.create(workout=workout_session, description=workout.get('cool_down'))
 
-        return redirect('upcoming_workouts', group_id=group_id)
+                for exercise in workout.get('exercises', []):
+                    Exercise.objects.create(
+                        workout=workout_session,
+                        name=exercise.get('name'),
+                        sets=exercise.get('sets'),
+                        reps=exercise.get('reps'),
+                        description=exercise.get('description')
+                    )
+
+
+            print('REDIRECT')
+
+
+            workout_session = get_object_or_404(WorkoutSession, id=workout_session.id)
+            # exercises = workout_session.exer
+            print(f'Workout obtained {workout_session} ')
+            exercises = workout_session.exercises.all()
+            print(exercises)
+            return render(request, 'partials/workout_partial.html', {
+                'workout': workout_session,
+                'exercises': exercises,
+
+            })
+            # return redirect('upcoming_workouts', group_id=workout_session.group_id)
+        
+
+        except Exception as e:
+            print(f"Error during workout replacement: {e}")
+            return JsonResponse({'status': 'failed', 'error': str(e)}, status=500)
 
     return JsonResponse({'status': 'failed'}, status=400)
 
@@ -425,6 +410,8 @@ def replace_exercise(request, workout_id, exercise_id):
 
         # Delete the old exercise
         exercise.delete()
+
+        print(new_exercise_data)
 
         # Create and save the new exercise based on the API response
         new_exercise = Exercise.objects.create(
@@ -498,35 +485,6 @@ def location_update(request, pk):
         'action': 'Update',
     })
 
-# @login_required
-# def update_workout_session(request, pk):
-#     # Get the workout session or return a 404 error if not found
-#     workout = get_object_or_404(WorkoutSession, id=pk)
-
-#     # Initialize the WorkoutSessionForm with the current workout instance
-#     # workout_form = WorkoutSessionForm(request.POST or None, instance=workout)
-
-#     # Create a formset for updating the actual_weight of exercises
-#     ExerciseFormSet = modelformset_factory(Exercise, form=ExerciseForm, extra=0)
-#     exercise_formset = ExerciseFormSet(request.POST or None, queryset=workout.exercises.all())
-
-#     # Handle form submission
-#     if request.method == "POST":
-#         if workout_form.is_valid() and exercise_formset.is_valid():
-#             # Save workout session
-#             workout_form.save()
-
-#             # Save each exercise's actual_weight
-#             exercise_formset.save()
-
-#             return redirect('workout_calendar')  # Redirect to the calendar or other desired view
-
-#     context = {
-#         'workout_form': workout_form,
-#         'exercise_formset': exercise_formset,
-#         'workout': workout,
-#     }
-#     return render(request, 'update_workout_session.html', context)
 
 
 def update_personal_details(request):
@@ -580,6 +538,7 @@ from .forms import UserDetailsForm
 from .models import UserPreference
 
 def edit_field(request, field_name):
+    logger.debug(f"Editing field: {field_name}")
     preferences = UserPreference.objects.get(user=request.user)
     
     # Create a form instance with the user data
@@ -619,7 +578,10 @@ from django.shortcuts import render, redirect
 from .models import UserPreference
 from .forms import UserDetailsForm  # Make sure you import the appropriate form
 
+logger = logging.getLogger(__name__)
+
 def update_field(request, field_name):
+    logger.debug(f"Updating field: {field_name}")
     # Fetch the PersonalDetails instance
     personal_details = UserPreference.objects.get(user=request.user)
     # Adjust according to your logic
@@ -700,6 +662,11 @@ def create_workout_form_view(request):
             workout_data = convert_text_to_json(response.text)
             # print(workout_data)
             group_id = generate_random_id()
+            Query.objects.create(
+                group_id=group_id,
+                user=preferences,
+                query=payload_text
+            )
             # if workout_sessions:
             for workout in workout_data:
                 workout_session = WorkoutSession.objects.create(

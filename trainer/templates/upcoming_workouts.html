@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}  <!-- Ensure this is loaded -->
+{% load static %}
 {% load widget_tweaks %}
 {% block content %}
 
@@ -22,16 +22,16 @@
                 <div class="row align-items-center">
                 
                     {% for workout in workouts_data %}
-                        <div class="yellow-outline-box container mt-4">
-                        {% comment %} <div class="workout-card" id="workout-{{ workout.id }}"> {% endcomment %}
+                        
+                        <div class="yellow-outline-box container mt-4" id="workout-{{ workout.id }}">
+                            <h4> {{ workout.date|date:"l" }} </h4>
                             <h3 class="pb-3">{{ workout.name }}</h3>
                             <button class="btn btn-warning bt-sm mt-3 btn-block" style="font-size: 20px;"
-                                hx-post="{% url 'replace_workout' workout.id %}" 
+                                hx-post="{% url 'replace_workout' group_id=workout.group_id workout_id=workout.id %}" 
                                 hx-target="#workout-{{ workout.id }}" 
                                 hx-swap="outerHTML">
                                     Change Workout
                             </button>
-                            {% comment %} <hr class="pt-3"> {% endcomment %}
                             <p class='mt-4'><strong>Goal:</strong> {{ workout.goal }}</p>
                             <hr>
                             <p><strong>Date:</strong> {{ workout.date }}</p>
@@ -45,29 +45,25 @@
                                     <h2>Workout</h2>
                                   </div>
                             {% for exercise in workout.exercises %}
-                                {% comment %} <li id="exercise-{{ exercise.id }}"> {% endcomment %}
+                                <div id="exercise-{{ exercise.id }}">
                                     <p><strong>{{ exercise.name }}</strong> - Sets: {{ exercise.sets }}, Reps: {{ exercise.reps }}<p>
                                     {% if exercise.recommended_weight %}
                                         <p>Recommended Weight: {{ exercise.recommended_weight }}</p>
                                     {% endif %}
                                     <em class="pb-3">{{ exercise.description }}</em>
-                                    <br>
-                                    <br>
+                                    <br><br>
                                     <button 
-                                    class="btn btn-warning btn-sm"
-                                    hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
-                                    hx-target="#exercise-{{ exercise.id }}" 
-                                    hx-swap="outerHTML">
-                                    Change Exercise
-                                </button>
-                                {% comment %} </li> {% endcomment %}
-
+                                        class="btn btn-warning btn-sm"
+                                        hx-post="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" 
+                                        hx-target="#exercise-{{ exercise.id }}" 
+                                        hx-swap="outerHTML">
+                                        Change Exercise
+                                    </button>
+                                </div>
                                 <hr>
                             {% endfor %}
                             </div>
                             <p><strong>Cool-Down:</strong> {{ workout.cool_down }}</p>
-                            {% comment %} <hr>
-                            <br> {% endcomment %}
                         </div>
                     {% endfor %}
                 <br>
@@ -75,4 +71,20 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
+
+<script src="https://unpkg.com/htmx.org"></script>
+<script>
+    document.body.addEventListener("htmx:configRequest", function (event) {
+        console.log("HTMX Request Configured:", event.detail.verb, event.detail.path);
+    });
+
+    document.body.addEventListener("htmx:beforeRequest", function (event) {
+        console.log("HTMX Before Request:", event.detail.requestConfig);
+    });
+
+    document.body.addEventListener("htmx:responseError", function (event) {
+        console.error("HTMX Response Error:", event.detail.xhr.statusText);
+    });
+</script>

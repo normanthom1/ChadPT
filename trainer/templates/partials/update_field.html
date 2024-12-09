@@ -1,4 +1,12 @@
 <div id="{{ field_name }}-display">
-    <h3>{{ field_name|title }}:</h3>
-    <p>{{ form[field_name].value }}</p>  <!-- Display the updated field value -->
+    <p>{{ field_name|title }}: {{ field_value }}
+    
+        <!-- Add an edit button to allow further editing -->
+        <button 
+            hx-get="{% url 'edit_field' field_name %}" 
+            hx-target="#{{ field_name }}-display" 
+            hx-swap="outerHTML">
+            <i class="fas fa-pencil-alt"></i> Edit
+        </button>
+    </p>
 </div>

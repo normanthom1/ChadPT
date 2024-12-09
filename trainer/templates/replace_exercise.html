@@ -5,7 +5,7 @@
     <title>Replace Exercise</title>
 </head>
 <body>
-    <h1>Replace Exercise for Workout: {{ workout.name }}</h1>
+    <h1>!!! Replace Exercise for Workout: {{ workout.name }}</h1>
 
     <form action="{% url 'replace_exercise' workout_id=workout.id exercise_id=exercise.id %}" method="post">
         {% csrf_token %}

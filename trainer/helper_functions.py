@@ -69,13 +69,16 @@ def safe_join(field):
             pass
     return ', '.join(field) if isinstance(field, list) else field
 
-    
+
+import json
+import re
+
 def convert_text_to_json(text):
     """
     Converts a JSON-like text input to a Python object.
 
     Args:
-        text (str): A string containing JSON-formatted data, possibly wrapped in backticks.
+        text (str): A string containing JSON-formatted data, possibly wrapped in delimiters.
 
     Returns:
         dict or list: A Python object (e.g., list or dictionary) parsed from the JSON text.
@@ -88,12 +91,24 @@ def convert_text_to_json(text):
         raise ValueError("Input text is empty or invalid.")
     
     try:
-        # Remove backticks and the "json" marker if present
-        sanitized_text = text.strip().lstrip("```json").rstrip("```").strip()
+        # Normalize and remove common wrappers such as backticks or markers
+        sanitized_text = text.strip()
+        
+        # Remove ```json or ``` if present
+        if sanitized_text.startswith("```json") or sanitized_text.startswith("```"):
+            sanitized_text = sanitized_text.lstrip("```json").lstrip("```").strip()
+        
+        # Remove ending backticks if present
+        if sanitized_text.endswith("```"):
+            sanitized_text = sanitized_text.rstrip("```").strip()
+        
+        # Fix invalid JSON (e.g., unquoted strings in values)
+        sanitized_text = re.sub(r'(?<="reps": )([^",\]}]+)', r'"\1"', sanitized_text)
+        
         # Parse the sanitized JSON
         return json.loads(sanitized_text)
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON format: {e}\nInput text: {sanitized_text[:500]}...")
+        raise ValueError(f"Invalid JSON format: {e}\nInput text: {sanitized_text[:2000]}...")
 
     
 class CustomJSONEncoder(json.JSONEncoder):

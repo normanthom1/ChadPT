@@ -1,6 +1,6 @@
 {% load static %}
 
-<form method="post" hx-post="{% url 'update_field' field_name %}" hx-target="#{{ field_name }}-display" hx-swap="outerHTML">
+<form method="post" hx-post="{% url 'update_field' field_name %}" hx-target="#{{ field_name }}-display" hx-swap="outerHTML" hx-debug>
     {% csrf_token %}
     <div class="form-group">
         {% for field in form %}
